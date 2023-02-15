@@ -34,7 +34,7 @@ namespace OrderFlow.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<bool>> GetStatus([FromQuery] int categoryId)
+        public async Task<ActionResult<bool>> GetProducts([FromQuery] int categoryId)
         {
             return CustomResponse();
         }
