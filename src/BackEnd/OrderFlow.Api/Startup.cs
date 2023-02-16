@@ -38,7 +38,7 @@ namespace OrderFlow.Api
                     options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
                 });
             services.AddAutoMapper(typeof(Startup));
-            services.AddDbContext<OrderFlowContext>(opt => opt.UseSqlServer("Data Source=localhost;Initial Catalog=OrderFlowDB;User Id=Admin;Password=qwerty123456"));
+            services.AddDbContext<OrderFlowContext>(opt => opt.UseSqlServer("Data Source=179.0.75.150\\MSSQLSERVER,5657;Initial Catalog=OrderFlowDB;User Id=Admin;Password=qwerty123456"));
             services.ResolveDependencies();
             services.AddSwaggerGen(c =>
             {
