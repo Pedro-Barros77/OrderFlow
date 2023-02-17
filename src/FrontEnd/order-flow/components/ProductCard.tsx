@@ -1,17 +1,15 @@
 import 'intl';
 import "intl/locale-data/jsonp/pt-BR"
-import { AntDesign } from '@expo/vector-icons'; 
+import { AntDesign } from '@expo/vector-icons';
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Colors, GetCategoryColor } from "../constants/Colors";
 import { CategoryColor, CategoryIcons } from "../constants/Enums";
 import { CategoryIcon } from "../constants/Icons";
 import { Category } from '../Models/Category';
+import { Product } from '../Models/Product';
 
 const ProductCard = (props: {
-  title?: string;
-  price?: CategoryColor;
-  imageUrl?: string;
-  category?: Category;
+  product: Product;
   hidden?: boolean;
 }) => {
 
@@ -26,28 +24,31 @@ const ProductCard = (props: {
   ) : (
     <TouchableOpacity activeOpacity={0.7} style={styles.container}>
       <View
-        style={[styles.imgContaier,{ backgroundColor: GetCategoryColor(props.category?.ColorTheme, true)}]}>
-        
-        <AntDesign style={styles.star} name="star" size={15} color={Colors.app.yellowStar} />
+        style={[styles.imgContaier, { backgroundColor: GetCategoryColor(props.product.Category?.ColorTheme, true) }]}>
+        {props.product.IsFavorite ?
+          <AntDesign style={styles.star} name="star" size={15} color={Colors.app.yellowStar} />
+          :
+          <></>
+        }
 
         <CategoryIcon
-          catIcon={props.category?.CategoryIcon}
+          catIcon={props.product.Category?.CategoryIcon}
           size={50}
-          color={GetCategoryColor(props.category?.ColorTheme, false)}
+          color={GetCategoryColor(props.product.Category?.ColorTheme, false)}
         ></CategoryIcon>
       </View>
 
       <View style={styles.textContainer}>
         <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit>
-          {props.title}
+          {props.product.Name}
         </Text>
         <Text style={styles.price} numberOfLines={1} adjustsFontSizeToFit>
-          {formatter.format(props.price ?? 0).replace("$", "$ ")}
+          {formatter.format(props.product.Price ?? 0).replace("$", "$ ")}
         </Text>
       </View>
 
       <TouchableOpacity activeOpacity={0.7} style={styles.btnAdd}>
-      <Text style={styles.btnAddText}>
+        <Text style={styles.btnAddText}>
           Adicionar
         </Text>
       </TouchableOpacity>
@@ -64,16 +65,16 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "space-between",
     backgroundColor: Colors.app.white,
-    
+
     marginVertical: 5,
     width: "30%",
     height: 180,
-    
-  shadowColor: 'black',
-  shadowOpacity: 1,
-  shadowOffset: { width: 0, height: 2},
-  shadowRadius: 10,
-  elevation: 5,
+
+    shadowColor: 'black',
+    shadowOpacity: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 10,
+    elevation: 5,
   },
 
   imgContaier: {
@@ -84,15 +85,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  star:{
-    position:"absolute",
+  star: {
+    position: "absolute",
     right: 5,
     top: 5,
   },
 
   textContainer: {
-    flex:1,
-    justifyContent:"space-between",
+    flex: 1,
+    justifyContent: "space-between",
     // display:"flex",
     // alignContent:"flex-start",
   },
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 1,
     color: Colors.app.text,
     textAlign: "center",
-    fontSize:14,
+    fontSize: 14,
     letterSpacing: -0.5
   },
 
@@ -109,22 +110,22 @@ const styles = StyleSheet.create({
     marginHorizontal: 1,
     color: Colors.app.currencyGreen,
     textAlign: "center",
-    fontSize:11,
-    fontWeight:"bold",
+    fontSize: 11,
+    fontWeight: "bold",
   },
 
-  btnAdd:{
-    display:"flex",
-    width:"100%",
-    height:30,
-    backgroundColor:Colors.app.tintGreen,
-    justifyContent:"center",
+  btnAdd: {
+    display: "flex",
+    width: "100%",
+    height: 30,
+    backgroundColor: Colors.app.tintGreen,
+    justifyContent: "center",
   },
-  btnAddText:{
+  btnAddText: {
     color: Colors.app.white,
     textAlign: "center",
-    fontSize:12,
-    fontWeight:"bold",
+    fontSize: 12,
+    fontWeight: "bold",
   }
 });
 

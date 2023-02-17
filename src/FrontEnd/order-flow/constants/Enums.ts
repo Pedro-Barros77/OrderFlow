@@ -1,16 +1,16 @@
 export enum CategoryColor {
-  gray = 0,
-  blue = 1,
-  orange = 2,
-  yellow = 3,
-  purple = 4,
+  gray = 1,
+  blue = 2,
+  orange = 3,
+  yellow = 4,
+  purple = 5,
 }
 
 export enum CategoryIcons {
-    question = 0,
-    drinks = 1,
-    meat = 2,
-    portions = 3,
-    desserts = 4,
+    question = 1,
+    drinks = 2,
+    meat = 3,
+    portions = 4,
+    desserts = 5,
   }
 

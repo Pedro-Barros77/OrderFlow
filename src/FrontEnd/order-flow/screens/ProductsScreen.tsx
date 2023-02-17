@@ -14,7 +14,9 @@ export default function Products() {
   const txtProductsRef = useRef("Teste");
   const [txtProductsValue, setText] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
-
+  const [currentCategories, setCategories] = useState<Array<Category>>([]);
+  const [currentProducts, setProducts] = useState<Array<Product>>([]);
+  const [productsDividerText, setProductsDividerText] = useState("Favoritos");
 
   const Categories = [
     new Category(1, "Bebidas", CategoryColor.blue, CategoryIcons.drinks),
@@ -25,18 +27,62 @@ export default function Products() {
   ];
 
   const Favorites = [
-    new Product(1, "Batata Média", Categories.find(x => x.Id == 3), 15.00, ""),
-    new Product(2, "Heineken Long Neck", Categories.find(x => x.Id == 1), 8.00, ""),
-    new Product(3, "Peixe Grande", Categories.find(x => x.Id == 2), 40.00, ""),
-    new Product(4, "Churrasquinho", Categories.find(x => x.Id == 2), 9.00, ""),
-    new Product(5, "Molho Extra", Categories.find(x => x.Id == 5), 2.00, ""),
+    new Product(1, "Batata Média", Categories.find((x) => x.Id == 3), 15.0, "", true),
+    new Product(2, "Heineken Long Neck", Categories.find((x) => x.Id == 1), 8.0, "", true),
+    new Product(3, "Peixe Grande", Categories.find((x) => x.Id == 2), 40.0, "", true),
+    new Product(4, "Churrasquinho", Categories.find((x) => x.Id == 2), 9.0, "", false),
+    new Product(5, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
+    new Product(6, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", true),
+    new Product(7, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
+    new Product(8, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
+    new Product(9, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
+    new Product(10, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", true),
+    new Product(11, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
+    new Product(12, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
   ];
 
+  React.useEffect(() => {
+    OnSearchChange();
+  }, [txtProductsValue]);
+
+  function OnSearchChange() {
+    setCategories(Categories.filter((x) => x.Title.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1));
 
 
+    let newProducts = []
+    if (txtProductsValue.length > 0) {
+      newProducts = Favorites.filter((x) =>
+        x.Name.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1 ||
+        x.Category.Title.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1
+      );
+
+      setProducts([...newProducts].sort(SortProducts));
+    }
+    else {
+      newProducts = Favorites.filter((x) => x.IsFavorite);
+      setProducts(newProducts);
+    }
+    setProductsDividerText(txtProductsValue.length == 0 ? "Favoritos" : "Produtos")
+  }
+
+  function SortProducts(a: Product, b: Product): number {
+    const gr = (a: any, b: any): any => a > b;
+    const sm = (a: any, b: any): any => a > b;
+    const cmp = (a: any, b: any) => gr(a, b) - sm(a, b)
+
+    if(a.IsFavorite && !b.IsFavorite) return -1;
+    else if(!a.IsFavorite && b.IsFavorite) return 1;
+
+    return ((a.Name.toLowerCase().startsWith(txtProductsValue.toLowerCase()) ? -1 : 1))
+      ||
+      (
+        cmp(a.Name.toLowerCase(), b.Name.toLowerCase())
+        || cmp(a.Category.Title.toLowerCase(), b.Category.Title.toLowerCase())
+      )
+  }
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <TextInputBtn
         ref={txtProductsRef}
         placeholder="Produtos"
@@ -46,12 +92,12 @@ export default function Products() {
 
       <HorizontalDivider label="Categorias" />
 
-      <ShowMore disabled={Categories.length <= 8}>
+      <ShowMore disabled={currentCategories.length <= 8}>
         <SafeAreaView>
           <FlatList
             columnWrapperStyle={styles.categoryCol}
             contentContainerStyle={{ justifyContent: "center" }}
-            data={FillOdd(Categories, 2)}
+            data={FillOdd(currentCategories, 2)}
             numColumns={2}
             renderItem={({ item }) => {
               return (
@@ -68,41 +114,38 @@ export default function Products() {
         </SafeAreaView>
       </ShowMore>
 
-      <HorizontalDivider label="Favoritos" />
+      <HorizontalDivider label={productsDividerText} />
 
-      <SafeAreaView>
-          <FlatList
-            columnWrapperStyle={styles.categoryCol}
-            contentContainerStyle={{ justifyContent: "center" }}
-            data={FillOdd(Favorites, 3)}
-            numColumns={3}
-            renderItem={({ item }) => {
-              return (
-                <ProductCard
-                  title={item.Name}
-                  price={item.Price}
-                  category={item.Category}
-                  imageUrl={item.ImageUrl}
-                  hidden={item.Id == 0}
-                />
-              );
-            }}
-            keyExtractor={(item, index) => item.Id.toString()}
-          />
-        </SafeAreaView>
+      <SafeAreaView style={{ flex: 1 }}>
+        <FlatList
+          columnWrapperStyle={styles.categoryCol}
+          contentContainerStyle={{ justifyContent: "center" }}
+          data={FillOdd(currentProducts, 3)}
+          numColumns={3}
+          renderItem={({ item }) => {
+            return (
+              <ProductCard
+                product={item}
+                hidden={item.Id == 0}
+              />
+            );
+          }}
+          keyExtractor={(item, index) => item.Id.toString()}
+        />
+      </SafeAreaView>
     </View>
   );
 }
 
 function FillOdd(data: any, columns: number) {
-  while(data.length % columns != 0){
+  while (data.length % columns != 0) {
     data.push(Object.create(data[0]));
     data[data.length - 1].Id = 0;
   }
   return data;
 }
 
-function OnSearch() {}
+function OnSearch() { }
 
 const styles = StyleSheet.create({
   title: {
