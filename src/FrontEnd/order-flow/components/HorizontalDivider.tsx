@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import Colors from "../constants/Colors";
+import {Colors} from "../constants/Colors";
 import React from "react";
 
 const HorizontalDivider = (props: {
@@ -23,7 +23,7 @@ const HorizontalDivider = (props: {
         
       </View>
 
-      <Text style={[styles.label, {color:props.lineColor ? props.lineColor : Colors.app.gray}]}>{props.label}</Text>
+      <Text style={[styles.label, {color:props.lineColor ? props.lineColor : Colors.app.gray, marginHorizontal: props.label ? 5 : 0}]}>{props.label}</Text>
 
       <View 
         style={[
@@ -50,19 +50,19 @@ const styles = StyleSheet.create({
     alignSelf:"center",
 
     marginVertical: 10,
-    width: "80%",
+    width: "88%",
   },
 
   leftLine: {
-    width: "5%",
-    marginRight: 5,
+    width: "3%",
   },
 
-  label: {},
+  label: {
+    fontSize:13,
+  },
 
   rightLine: {
     width:"5%",
-    marginLeft: 5,
     flex:1,
   },
 });

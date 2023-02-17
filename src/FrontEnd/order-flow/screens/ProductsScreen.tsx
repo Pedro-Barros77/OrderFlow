@@ -3,19 +3,37 @@ import React, { useRef, useState } from "react";
 import TextInputBtn from "../components/TextInputBtn";
 import HorizontalDivider from "../components/HorizontalDivider";
 import CategoryCard from "../components/CategoryCard";
-import { CategoryColor } from "../constants/Enums";
+import { CategoryColor, CategoryIcons } from "../constants/Enums";
 import { FlatList } from "react-native";
+import ShowMore from "../components/ShowMore";
+import ProductCard from "../components/ProductCard";
+import { Category } from "../Models/Category";
+import { Product } from "../Models/Product";
 
 export default function Products() {
-  const txtProductsRef = React.useRef("Teste");
+  const txtProductsRef = useRef("Teste");
   const [txtProductsValue, setText] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
 
+
   const Categories = [
-    { id: 1, title: "Bebidas", colorTheme: CategoryColor.blue },
-    { id: 2, title: "Carne/Peixe", colorTheme: CategoryColor.blue },
-    { id: 3, title: "Carne/Peixe", colorTheme: CategoryColor.blue },
+    new Category(1, "Bebidas", CategoryColor.blue, CategoryIcons.drinks),
+    new Category(2, "Carne/Peixe", CategoryColor.orange, CategoryIcons.meat),
+    new Category(3, "Porções", CategoryColor.yellow, CategoryIcons.portions),
+    new Category(4, "Sobremesas", CategoryColor.purple, CategoryIcons.desserts),
+    new Category(5, "Outros", CategoryColor.gray, CategoryIcons.question),
   ];
+
+  const Favorites = [
+    new Product(1, "Batata Média", Categories.find(x => x.Id == 3), 15.00, ""),
+    new Product(2, "Heineken Long Neck", Categories.find(x => x.Id == 1), 8.00, ""),
+    new Product(3, "Peixe Grande", Categories.find(x => x.Id == 2), 40.00, ""),
+    new Product(4, "Churrasquinho", Categories.find(x => x.Id == 2), 9.00, ""),
+    new Product(5, "Molho Extra", Categories.find(x => x.Id == 5), 2.00, ""),
+  ];
+
+
+
 
   return (
     <View>
@@ -28,39 +46,60 @@ export default function Products() {
 
       <HorizontalDivider label="Categorias" />
 
+      <ShowMore disabled={Categories.length <= 8}>
+        <SafeAreaView>
+          <FlatList
+            columnWrapperStyle={styles.categoryCol}
+            contentContainerStyle={{ justifyContent: "center" }}
+            data={FillOdd(Categories, 2)}
+            numColumns={2}
+            renderItem={({ item }) => {
+              return (
+                <CategoryCard
+                  label={item.Title}
+                  catIcon={item.CategoryIcon}
+                  colorTheme={item.ColorTheme}
+                  hidden={item.Id == 0}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => item.Id.toString()}
+          />
+        </SafeAreaView>
+      </ShowMore>
+
+      <HorizontalDivider label="Favoritos" />
+
       <SafeAreaView>
-        <FlatList
-          contentContainerStyle={styles.categoryItems}
-          data={Categories}
-          numColumns={2}
-          renderItem={({ item }) => {
-            if (item.id == 0) {
-              return <View style={styles.emptyItem} />;
-            }
-            return (
-              <CategoryCard label={item.title} colorTheme={item.colorTheme} />
-            );
-          }}
-          keyExtractor={(item, index) => item.id.toString()}
-        />
-        <HorizontalDivider label="Favoritos" />
-      </SafeAreaView>
+          <FlatList
+            columnWrapperStyle={styles.categoryCol}
+            contentContainerStyle={{ justifyContent: "center" }}
+            data={FillOdd(Favorites, 3)}
+            numColumns={3}
+            renderItem={({ item }) => {
+              return (
+                <ProductCard
+                  title={item.Name}
+                  price={item.Price}
+                  category={item.Category}
+                  imageUrl={item.ImageUrl}
+                  hidden={item.Id == 0}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => item.Id.toString()}
+          />
+        </SafeAreaView>
     </View>
   );
 }
 
-function createRows(data: any, columns: number) {
-  const rows = Math.floor(data.length / columns); // [A]
-  let lastRowElements = data.length - rows * columns; // [B]
-  while (lastRowElements !== columns) {
-    // [C]
-    data.push({
-      // [D]
-      id: 0,
-    });
-    lastRowElements += 1; // [E]
+function FillOdd(data: any, columns: number) {
+  while(data.length % columns != 0){
+    data.push(Object.create(data[0]));
+    data[data.length - 1].Id = 0;
   }
-  return data; // [F]
+  return data;
 }
 
 function OnSearch() {}
@@ -74,11 +113,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
     marginVertical: 10,
   },
-  categoryItems: {
-    justifyContent: 'space-evenly',
-    
+  categoryCol: {
+    justifyContent: "space-evenly",
+    marginHorizontal: "2%",
   },
-  emptyItem:{
-    backgroundColor:"transparent"
-  }
+  emptyItem: {
+    backgroundColor: "transparent",
+  },
 });

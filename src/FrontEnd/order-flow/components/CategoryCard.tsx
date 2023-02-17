@@ -1,37 +1,32 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import Colors from "../constants/Colors";
-import { CategoryColor } from "../constants/Enums";
+import {Colors, GetCategoryColor} from "../constants/Colors";
+import { CategoryColor, CategoryIcons } from "../constants/Enums";
+import { CategoryIcon } from "../constants/Icons";
 
 const CategoryCard = (props: {
   label?: string;
   colorTheme?: CategoryColor;
-  iconName?: string;
+  catIcon?: string;
+  hidden?: boolean;
 }) => {
-  return (
+  return props.hidden ? <View style={{width:"47.5%"}}></View> : (
+    
     <TouchableOpacity
     activeOpacity={.7}
       style={[
         styles.container,
-        { backgroundColor: getColor(props.colorTheme) , borderColor: getColor(props.colorTheme, true)},
+        { backgroundColor: GetCategoryColor(props.colorTheme) , borderColor: GetCategoryColor(props.colorTheme, true)},
       ]}
     >
       <Text style={styles.label}>{props.label}</Text>
-      <MaterialCommunityIcons name="beer" size={24} color={getColor(props.colorTheme, true)} />
+      <CategoryIcon catIcon={props.catIcon} size={24} color={GetCategoryColor(props.colorTheme, true)}></CategoryIcon>
 
     </TouchableOpacity>
-  );
+    );
 };
 
-function getColor(catColor?: CategoryColor, isSecondary?: boolean): string {
-  switch (catColor) {
-    case CategoryColor.blue:
-      if (isSecondary) return Colors.app.catTheme_darkBlue;
-      else return Colors.app.catTheme_blue;
-    default:
-      return Colors.app.gray;
-  }
-}
+
 
 const styles = StyleSheet.create({
   container: {
@@ -41,13 +36,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent:"space-between",
     paddingHorizontal: 10,
-
-    marginVertical: 10,
-    marginHorizontal: 5,
-    width: "45%",
-    height: 50,
-    borderWidth: 3,
-    borderRadius: 10,
+    
+    marginVertical: 3,
+    // marginHorizontal: 5,
+    // marginRight:"auto",
+    width: "47.5%",
+    height: 35,
+    borderWidth: 2,
+    borderRadius: 5,
   },
 
   label:{
