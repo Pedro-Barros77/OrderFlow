@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OrderFlow.Data.Context;
 
@@ -10,9 +11,10 @@ using OrderFlow.Data.Context;
 namespace OrderFlow.Data.Migrations
 {
     [DbContext(typeof(OrderFlowContext))]
-    partial class OrderFlowContextModelSnapshot : ModelSnapshot
+    [Migration("20230217165009_addtablecategory")]
+    partial class addtablecategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,11 +89,6 @@ namespace OrderFlow.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("CategoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
-
                     b.Property<string>("Description")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -115,8 +112,6 @@ namespace OrderFlow.Data.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
                 });
@@ -159,22 +154,6 @@ namespace OrderFlow.Data.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Table");
-                });
-
-            modelBuilder.Entity("OrderFlow.Business.Models.Product", b =>
-                {
-                    b.HasOne("OrderFlow.Business.Models.Category", "Category")
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("OrderFlow.Business.Models.Category", b =>
-                {
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("OrderFlow.Business.Models.Product", b =>

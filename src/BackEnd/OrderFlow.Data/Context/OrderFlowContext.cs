@@ -11,6 +11,9 @@ namespace OrderFlow.Data.Context
         }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<Table> Tables { get; set; }
+        public DbSet<Item> Items { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
 
 

@@ -42,7 +42,7 @@ namespace OrderFlow.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> AddProduct([FromBody] PostProducts product)
+        public async Task<ActionResult<Product>> AddProduct([FromBody] PostProduct product)
         {
             var _product = _mapper.Map<Product>(product);
             var p = await _service.AddProduct(_product);
