@@ -5,27 +5,37 @@
  */
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import {
-  NavigationContainer
+  NavigationContainer,
+  createNavigationContainerRef
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 
-import Colors from "../constants/Colors";
+import {Colors} from "../constants/Colors";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import TablesScreen from "../screens/TablesScreen";
 import Products from "../screens/ProductsScreen";
+import EditProduct from "../screens/EditProductScreen";
 import {
   RootStackParamList,
   RootTabParamList,
   RootTabScreenProps,
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+
+export const navigationRef = React.createRef<any>();
+
+export function navigate(name:string, params:any) {
+  navigationRef.current?.navigate(name, params);
+}
 
 export default function Navigation() {
   return (
-    <NavigationContainer linking={LinkingConfiguration}>
+    <NavigationContainer ref={navigationRef} linking={LinkingConfiguration}>
       <RootNavigator />
     </NavigationContainer>
   );
@@ -49,6 +59,11 @@ function RootNavigator() {
         name="NotFound"
         component={NotFoundScreen}
         options={{ title: "Oops!" }}
+      />
+      <Stack.Screen
+        name="EditProduct"
+        component={EditProduct}
+        options={{ title: "Novo Produto" }}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
@@ -85,6 +100,7 @@ function BottomTabNavigator() {
         options={{
           title: "Produtos",
           tabBarIcon: ({ color }) => TabBarIcon({name:"shopping-cart", color:color}),
+          headerTitle: (props) => ProductsHeader(props)
         }}
       />
     </BottomTab.Navigator>
@@ -99,4 +115,33 @@ function TabBarIcon(props: {
   color: string;
 }) {
   return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
+}
+
+function ProductsHeader(props: any) {
+  const styles = StyleSheet.create({
+    container:{
+      width:"100%",
+      display:"flex",
+      flexDirection:"row",
+      alignItems:"center",
+      justifyContent:"space-between"
+    },
+    title:{
+      fontSize: 18,
+      fontWeight:"500",
+    }
+  });
+
+  const onCreateProduct = () => {
+    navigate('EditProduct', undefined);
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Produtos</Text>
+      <TouchableOpacity onPress={onCreateProduct}>
+        <MaterialCommunityIcons name="plus-circle" size={35} color={Colors.app.tintGreen} />
+      </TouchableOpacity>
+    </View>
+  );
 }
