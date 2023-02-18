@@ -5,8 +5,8 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Colors, GetCategoryColor } from "../constants/Colors";
 import { CategoryColor, CategoryIcons } from "../constants/Enums";
 import { CategoryIcon } from "../constants/Icons";
-import { Category } from '../Models/Category';
-import { Product } from '../Models/Product';
+import { Category } from '../models/Category';
+import { Product } from '../models/Product';
 
 const ProductCard = (props: {
   product: Product;

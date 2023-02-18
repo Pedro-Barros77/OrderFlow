@@ -18,7 +18,7 @@ import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import TablesScreen from "../screens/TablesScreen";
 import Products from "../screens/ProductsScreen";
-import CreateProduct from "../screens/CreateProductScreen";
+import EditProduct from "../screens/EditProductScreen";
 import {
   RootStackParamList,
   RootTabParamList,
@@ -61,8 +61,8 @@ function RootNavigator() {
         options={{ title: "Oops!" }}
       />
       <Stack.Screen
-        name="CreateProduct"
-        component={CreateProduct}
+        name="EditProduct"
+        component={EditProduct}
         options={{ title: "Novo Produto" }}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>
@@ -133,7 +133,7 @@ function ProductsHeader(props: any) {
   });
 
   const onCreateProduct = () => {
-    navigate('CreateProduct', undefined);
+    navigate('EditProduct', undefined);
   }
 
   return (

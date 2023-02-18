@@ -3,7 +3,7 @@ import { CategoryColor } from "./Enums";
 const Colors = {
   app: {
     //basics
-    white: 'rgb(255,2555,255)',
+    white: 'rgb(255,255,255)',
     green: 'rgb(0,255,0)',
     yellow: 'rgb(255,255,0)',
 

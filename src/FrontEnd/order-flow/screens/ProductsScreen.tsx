@@ -7,8 +7,8 @@ import { CategoryColor, CategoryIcons } from "../constants/Enums";
 import { FlatList } from "react-native";
 import ShowMore from "../components/ShowMore";
 import ProductCard from "../components/ProductCard";
-import { Category } from "../Models/Category";
-import { Product } from "../Models/Product";
+import { Category } from "../models/Category";
+import { Product } from "../models/Product";
 import { RootTabScreenProps } from "../types";
 
 export default function Products({ navigation }: RootTabScreenProps<'Products'>) {
