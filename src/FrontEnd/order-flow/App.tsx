@@ -1,8 +1,9 @@
+import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import useCachedResources from './hooks/useCachedResources';
-import Navigation from './navigation';
+import Navigation, { navigationRef } from './navigation';
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -12,7 +13,7 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <Navigation/>
+        <Navigation />
         <StatusBar />
       </SafeAreaProvider>
     );

@@ -9,9 +9,10 @@ import ShowMore from "../components/ShowMore";
 import ProductCard from "../components/ProductCard";
 import { Category } from "../Models/Category";
 import { Product } from "../Models/Product";
+import { RootTabScreenProps } from "../types";
 
-export default function Products() {
-  const txtProductsRef = useRef("Teste");
+export default function Products({ navigation }: RootTabScreenProps<'Products'>) {
+  const txtProductsRef = useRef(null);
   const [txtProductsValue, setText] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
   const [currentCategories, setCategories] = useState<Array<Category>>([]);
@@ -151,10 +152,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-  },
-  inputContainer: {
-    marginHorizontal: 30,
-    marginVertical: 10,
   },
   categoryCol: {
     justifyContent: "space-evenly",

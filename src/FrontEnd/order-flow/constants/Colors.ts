@@ -17,6 +17,7 @@ const Colors = {
     gray: 'rgb(170,170,170)',
     currencyGreen: 'rgb(82, 140, 73)',
     yellowStar:'rgb(254, 226, 65)',
+    redCancel:'rgb(194, 82, 70)',
 
 
     //categories
