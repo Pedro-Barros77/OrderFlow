@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OrderFlow.Data.Context;
 
@@ -10,9 +11,10 @@ using OrderFlow.Data.Context;
 namespace OrderFlow.Data.Migrations
 {
     [DbContext(typeof(OrderFlowContext))]
-    partial class OrderFlowContextModelSnapshot : ModelSnapshot
+    [Migration("20230217170046_addcategoryId")]
+    partial class addcategoryId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -25,6 +25,14 @@ namespace OrderFlow.Data.Mappings
             builder.Property(d => d.ImageURL)
                 .IsRequired(false)
                 .HasMaxLength(255);
+
+            builder.HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId);
+
+            builder.Property(d => d.CategoryId)
+                .HasDefaultValue(1);
+                
         }
     }
 }

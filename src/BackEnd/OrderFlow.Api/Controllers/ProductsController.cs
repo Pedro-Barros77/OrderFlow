@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OrderFlow.Business.Config;
 using OrderFlow.Business.DTO;
 using OrderFlow.Business.Enums;
@@ -30,7 +31,8 @@ namespace OrderFlow.Api.Controllers
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<Product>>> GetAll()
         {
-            return CustomResponse();
+            var Produtos = await _service.GetAll();
+            return CustomResponse(Produtos);
         }
 
         [HttpGet]
@@ -40,12 +42,30 @@ namespace OrderFlow.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> PostRecord([FromBody] PostProducts product)
+        public async Task<ActionResult<Product>> AddProduct([FromBody] PostProduct product)
         {
             var _product = _mapper.Map<Product>(product);
+            var p = await _service.AddProduct(_product);
+            return CustomResponse(p);
+        }
 
-            //var result = await _service.add(_product);
-            return CustomResponse();
+        [HttpDelete]
+        public async Task<ActionResult<Product>> DeleteProduct([FromQuery] int productID)
+        {
+            
+            var result = await _service.DeleteProduct(productID);
+            return CustomResponse(result);
+
+        }
+
+        [HttpPut]
+        public async Task<ActionResult<Product>> UpdateProduct([FromQuery] int productID, [FromBody] Product product)
+        {
+            if (productID != product.Id) _responseService.DivergentId(productID, product.Id);
+            if (HasError()) return CustomResponse(product);
+            var result = await _service.UpdateProduct(product);
+            return CustomResponse(result);
+            
         }
     }
 }

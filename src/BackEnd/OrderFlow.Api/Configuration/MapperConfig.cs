@@ -8,9 +8,11 @@ namespace OrderFlow.Api.Configuration
     {
         public MapperConfig()
         {
-            CreateMap<Product, PostProducts>();
-            CreateMap<PostProducts, Product>();
-            CreateMap<Product, GetProducts>();
+            CreateMap<Product, PostProduct>().ReverseMap();
+            CreateMap<Product, GetProduct>().ReverseMap();
+            CreateMap<Category, GetCategory>().ReverseMap();
+            CreateMap<Category, PostCategory>().ReverseMap();
+            CreateMap<Category, PutCategory>().ReverseMap();
 
             //CreateMap<Esquerda, Direita>()
             //    .ForMember(direita => direita.Propriedade, opcoes => opcoes.MapFrom(esquerda => esquerda.Propriedade));

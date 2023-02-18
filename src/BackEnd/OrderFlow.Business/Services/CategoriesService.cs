@@ -13,15 +13,15 @@ using System.Threading.Tasks;
 
 namespace OrderFlow.Business.Services
 {
-    public class ProductsService : BaseService, IProductsService
+    public class CategoriesService : BaseService, ICategoriesService
     {
-        private readonly IProductsRepository _repository;
-        public ProductsService(IResponseService responseService, IProductsRepository repository) : base(responseService)
+        private readonly ICategoriesRepository _repository;
+        public CategoriesService(IResponseService responseService, ICategoriesRepository repository) : base(responseService)
         {
             _repository = repository;
         }
 
-        public async Task<Product> AddProduct(Product value)
+        public async Task<Category> AddCategory(Category value)
         {
             if (!IsValid(value)) return value;
             return await _repository.Add(value);
@@ -29,36 +29,35 @@ namespace OrderFlow.Business.Services
         }
 
         
-        private bool IsValid(Product value)
+        private bool IsValid(Category value)
         {
             Regex regex = new Regex(@"^[\w\s\-à-úÀ-Ú]+$");
             if (value.Title.Length > 50) { AddError("ERRO(Titulo deve ser menor que 50 caracteres) "); }
             if (!regex.IsMatch(value.Title)) { AddError("ERRO(Não é possível adicionar caracteres especiais ao Titulo) "); }
-            if (value.Description.Length > 255) { AddError("ERRO(Descrição deve ser menor que 255 caracteres) "); }
-            if (value.ImageURL.Length > 255) { AddError("ERRO(Imagem deve ser menor que 255 caracteres) "); }
-            if (value.Price < 0 ) { AddError("ERRO(Preço não pode ser valor negativo) "); }
+            if (value.ColorTheme < 0) { AddError("ERRO(O valor deve ser maior que zero "); }
+            if (value.CategoryIcon < 0) { AddError("ERRO(O valor deve ser maior que zero "); }
             return !HasError();
         }
 
         
 
 
-        public async Task< IEnumerable<Product>> GetAll()
+        public async Task< IEnumerable<Category>> GetAll()
         {
             return await _repository.GetAll();
             
         }
 
-        public async Task <bool> DeleteProduct(int value)
+        public async Task <bool> DeleteCategory(int value)
         {
             var p = await _repository.GetById(value);
-            if (p == null) AddError($"Produto com ID {value} não existe");
+            if (p == null) AddError($"Categoria com ID {value} não existe");
             if (HasError()) return false;
             await _repository.Remove(value);
             return !HasError();
         }
 
-        public async Task<Product> UpdateProduct(Product value)
+        public async Task<Category> UpdateCategory(Category value)
         {
             if (!IsValid(value)) return value;
             return await _repository.Update(value);
