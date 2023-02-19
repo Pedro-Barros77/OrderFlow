@@ -4,7 +4,7 @@ import { Provider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import useCachedResources from './hooks/useCachedResources';
-import Navigation, { navigationRef } from './navigation';
+import Navigation from './navigation';
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -16,7 +16,7 @@ export default function App() {
       <Provider>
         <SafeAreaProvider>
           <Navigation />
-          <StatusBar translucent={false}/>
+          <StatusBar translucent={false} />
         </SafeAreaProvider>
       </Provider>
     );

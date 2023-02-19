@@ -44,8 +44,12 @@ namespace OrderFlow.Business.Services
 
         public async Task< IEnumerable<Category>> GetAll()
         {
-            return await _repository.GetAll();
-            
+            return await _repository.GetAll();   
+        }
+
+        public async Task<Category> GetById(int id)
+        {
+            return await _repository.GetById(id);
         }
 
         public async Task <bool> DeleteCategory(int value)

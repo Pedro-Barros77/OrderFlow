@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OrderFlow.Business.DTO;
 using OrderFlow.Business.Interfaces.Repositories;
 using OrderFlow.Business.Interfaces.Services;
 using OrderFlow.Business.Models;
@@ -25,7 +26,6 @@ namespace OrderFlow.Business.Services
         {
             if (!IsValid(value)) return value;
             return await _repository.Add(value);
-            
         }
 
         
@@ -45,8 +45,12 @@ namespace OrderFlow.Business.Services
 
         public async Task< IEnumerable<Product>> GetAll()
         {
-            return await _repository.GetAll();
-            
+            return await _repository.GetQueryable().Include(x => x.Category).ToListAsync();
+        }
+
+        public async Task<Product> GetById(int id)
+        {
+            return await _repository.GetQueryable().Where(x => x.Id == id).Include(x => x.Category).FirstOrDefaultAsync();
         }
 
         public async Task <bool> DeleteProduct(int value)

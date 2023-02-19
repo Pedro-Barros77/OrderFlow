@@ -1,17 +1,10 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using OrderFlow.Business.Config;
 using OrderFlow.Business.DTO;
-using OrderFlow.Business.Enums;
-using OrderFlow.Business.Interfaces.Repositories;
 using OrderFlow.Business.Interfaces.Services;
 using OrderFlow.Business.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace OrderFlow.Api.Controllers
@@ -32,13 +25,15 @@ namespace OrderFlow.Api.Controllers
         public async Task<ActionResult<IEnumerable<Product>>> GetAll()
         {
             var Produtos = await _service.GetAll();
-            return CustomResponse(Produtos);
+            var _products = _mapper.Map<List<GetProduct>>(Produtos);
+            return CustomResponse(_products);
         }
 
         [HttpGet]
-        public async Task<ActionResult<bool>> GetProducts([FromQuery] int categoryId)
+        public async Task<ActionResult<bool>> GetProductById([FromQuery] int productId)
         {
-            return CustomResponse();
+            var product = await _service.GetById(productId);
+            return CustomResponse(product);
         }
 
         [HttpPost]
@@ -59,11 +54,12 @@ namespace OrderFlow.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<Product>> UpdateProduct([FromQuery] int productID, [FromBody] Product product)
+        public async Task<ActionResult<Product>> UpdateProduct([FromQuery] int productID, [FromBody] PutProduct product)
         {
-            if (productID != product.Id) _responseService.DivergentId(productID, product.Id);
-            if (HasError()) return CustomResponse(product);
-            var result = await _service.UpdateProduct(product);
+            var _product = _mapper.Map<Product>(product);
+            if (productID != _product.Id) _responseService.DivergentId(productID, _product.Id);
+            if (HasError()) return CustomResponse(_product);
+            var result = await _service.UpdateProduct(_product);
             return CustomResponse(result);
             
         }

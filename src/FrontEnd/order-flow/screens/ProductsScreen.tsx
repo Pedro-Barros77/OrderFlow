@@ -1,69 +1,96 @@
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
-import React, { useRef, useState } from "react";
+import { SafeAreaView, StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import TextInputBtn from "../components/TextInputBtn";
 import HorizontalDivider from "../components/HorizontalDivider";
 import CategoryCard from "../components/CategoryCard";
-import { CategoryColor, CategoryIcons } from "../constants/Enums";
-import { FlatList } from "react-native";
+import {DeviceEventEmitter} from 'react-native'
+
 import ShowMore from "../components/ShowMore";
 import ProductCard from "../components/ProductCard";
 import { Category } from "../models/Category";
 import { Product } from "../models/Product";
 import { RootTabScreenProps } from "../types";
+import { GetAllProducts } from "../services/Products.service";
+import { GetAllCategories } from "../services/Categories.service";
+import { Colors } from "../constants/Colors";
+import ToggleSwitch from "toggle-switch-react-native";
 
 export default function Products({ navigation }: RootTabScreenProps<'Products'>) {
+
   const txtProductsRef = useRef(null);
   const [txtProductsValue, setText] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
-  const [currentCategories, setCategories] = useState<Array<Category>>([]);
-  const [currentProducts, setProducts] = useState<Array<Product>>([]);
-  const [productsDividerText, setProductsDividerText] = useState("Favoritos");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(true);
+  const [refreshingProducts, setRefreshingProducts] = React.useState(false);
+  const [refreshingCategories, setRefreshingCategories] = React.useState(false);
 
-  const Categories = [
-    new Category(1, "Bebidas", CategoryColor.blue, CategoryIcons.drinks),
-    new Category(2, "Carne/Peixe", CategoryColor.orange, CategoryIcons.meat),
-    new Category(3, "Porções", CategoryColor.yellow, CategoryIcons.portions),
-    new Category(4, "Sobremesas", CategoryColor.purple, CategoryIcons.desserts),
-    new Category(5, "Outros", CategoryColor.gray, CategoryIcons.question),
-  ];
+  const [currentCategories, setCurrentCategories] = useState<Array<Category>>([]);
+  const [categories, setCategories] = useState<Array<Category>>([]);
 
-  const Favorites = [
-    new Product(1, "Batata Média", Categories.find((x) => x.Id == 3), 15.0, "", true),
-    new Product(2, "Heineken Long Neck", Categories.find((x) => x.Id == 1), 8.0, "", true),
-    new Product(3, "Peixe Grande", Categories.find((x) => x.Id == 2), 40.0, "", true),
-    new Product(4, "Churrasquinho", Categories.find((x) => x.Id == 2), 9.0, "", false),
-    new Product(5, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
-    new Product(6, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", true),
-    new Product(7, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
-    new Product(8, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
-    new Product(9, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
-    new Product(10, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", true),
-    new Product(11, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
-    new Product(12, "Molho Extra", Categories.find((x) => x.Id == 5), 2.0, "", false),
-  ];
+  const [currentProducts, setCurrentProducts] = useState<Array<Product>>([]);
+  const [products, setProducts] = useState<Array<Product>>([]);
+
+
+  async function fetchCategories() {
+    return GetAllCategories()
+      .then(list => {
+        setCategories(list);
+        setCurrentCategories(list);
+      });
+  }
+
+  async function fetchProducts(filterFavorites: boolean = true) {
+    return GetAllProducts()
+      .then(list => {
+        setProducts(list);
+        setCurrentProducts((filterFavorites ? list.filter((p) => p.isFavorite) : list));
+      });
+  }
+
+
+
+  React.useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+    DeviceEventEmitter.addListener('updateProducts', (e)=>fetchProducts())
+  }, [])
 
   React.useEffect(() => {
     OnSearchChange();
-  }, [txtProductsValue]);
+  }, [txtProductsValue])
+
+  const onRefreshProducts = React.useCallback((filterFavorites: boolean) => {
+    setRefreshingProducts(true);
+
+    fetchProducts(filterFavorites).finally(() => {
+      setRefreshingProducts(false);
+    });
+  }, []);
+
+  const onRefreshCategories = React.useCallback(() => {
+    setRefreshingCategories(true);
+
+    fetchCategories().finally(() => {
+      setRefreshingCategories(false);
+    });
+  }, []);
+
 
   function OnSearchChange() {
-    setCategories(Categories.filter((x) => x.Title.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1));
-
+    setCurrentCategories(categories.filter((x) => x.title.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1));
 
     let newProducts = []
     if (txtProductsValue.length > 0) {
-      newProducts = Favorites.filter((x) =>
-        x.Name.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1 ||
-        x.Category.Title.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1
+      newProducts = products.filter((x) =>
+        x.title.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1 ||
+        x.category.title.toLowerCase().indexOf(txtProductsValue.toLowerCase()) != -1
       );
-
-      setProducts([...newProducts].sort(SortProducts));
+      setCurrentProducts([...newProducts].sort(SortProducts));
     }
     else {
-      newProducts = Favorites.filter((x) => x.IsFavorite);
-      setProducts(newProducts);
+      newProducts = products.filter((x) => x.isFavorite);
+      setCurrentProducts(newProducts);
     }
-    setProductsDividerText(txtProductsValue.length == 0 ? "Favoritos" : "Produtos")
   }
 
   function SortProducts(a: Product, b: Product): number {
@@ -71,15 +98,23 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
     const sm = (a: any, b: any): any => a > b;
     const cmp = (a: any, b: any) => gr(a, b) - sm(a, b)
 
-    if(a.IsFavorite && !b.IsFavorite) return -1;
-    else if(!a.IsFavorite && b.IsFavorite) return 1;
+    if (a.isFavorite && !b.isFavorite) return -1;
+    else if (!a.isFavorite && b.isFavorite) return 1;
 
-    return ((a.Name.toLowerCase().startsWith(txtProductsValue.toLowerCase()) ? -1 : 1))
+    return ((a.title.toLowerCase().startsWith(txtProductsValue.toLowerCase()) ? -1 : 1))
       ||
       (
-        cmp(a.Name.toLowerCase(), b.Name.toLowerCase())
-        || cmp(a.Category.Title.toLowerCase(), b.Category.Title.toLowerCase())
+        cmp(a.title.toLowerCase(), b.title.toLowerCase())
+        || cmp(a.category.title.toLowerCase(), b.category.title.toLowerCase())
       )
+  }
+
+  function OnSearch() { 
+  }
+
+  function onFavoriteOnlyToggle(isOn: boolean) {
+    setShowFavoritesOnly(isOn);
+    setCurrentProducts(products.filter((p) => isOn ? p.isFavorite : true));
   }
 
   return (
@@ -95,58 +130,85 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
 
       <ShowMore disabled={currentCategories.length <= 8}>
         <SafeAreaView>
-          <FlatList
-            columnWrapperStyle={styles.categoryCol}
-            contentContainerStyle={{ justifyContent: "center" }}
-            data={FillOdd(currentCategories, 2)}
-            numColumns={2}
-            renderItem={({ item }) => {
-              return (
-                <CategoryCard
-                  label={item.Title}
-                  catIcon={item.CategoryIcon}
-                  colorTheme={item.ColorTheme}
-                  hidden={item.Id == 0}
-                />
-              );
-            }}
-            keyExtractor={(item, index) => item.Id.toString()}
-          />
+          {currentProducts.length > 0 ?
+            <FlatList
+              columnWrapperStyle={styles.categoryCol}
+              contentContainerStyle={{ justifyContent: "center" }}
+              data={FillOdd(currentCategories, 2)}
+              numColumns={2}
+              refreshControl={
+                <RefreshControl refreshing={refreshingCategories} onRefresh={onRefreshCategories} />
+              }
+              renderItem={({ item }) => {
+                return (
+                  <CategoryCard
+                    label={item.title}
+                    catIcon={item.categoryIcon}
+                    colorTheme={item.colorTheme}
+                    hidden={item.id == 0}
+
+                  />
+                );
+              }}
+              keyExtractor={(item, index) => item.id.toString()}
+            /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
         </SafeAreaView>
       </ShowMore>
 
-      <HorizontalDivider label={productsDividerText} />
+      <HorizontalDivider label={showFavoritesOnly && txtProductsValue.length == 0 ? "Favoritos" : "Produtos"} />
+
+      <View style={styles.favOnlyContainer}>
+        {txtProductsValue.length == 0 ?
+          <ToggleSwitch
+            isOn={showFavoritesOnly}
+            onColor={Colors.app.tintGreen}
+            offColor={Colors.app.redCancel}
+            animationSpeed={200}
+
+            label="Apenas Favoritos"
+            // labelStyle={styles.favoriteLabel}
+            size="medium"
+            onToggle={onFavoriteOnlyToggle}
+          /> : null}
+      </View>
+
 
       <SafeAreaView style={{ flex: 1 }}>
-        <FlatList
-          columnWrapperStyle={styles.categoryCol}
-          contentContainerStyle={{ justifyContent: "center" }}
-          data={FillOdd(currentProducts, 3)}
-          numColumns={3}
-          renderItem={({ item }) => {
-            return (
-              <ProductCard
-                product={item}
-                hidden={item.Id == 0}
-              />
-            );
-          }}
-          keyExtractor={(item, index) => item.Id.toString()}
-        />
+        {currentProducts.length > 0 ?
+          <FlatList
+            columnWrapperStyle={styles.categoryCol}
+            contentContainerStyle={{ justifyContent: "center" }}
+            data={FillOdd(currentProducts, 3)}
+            numColumns={3}
+            refreshControl={
+              <RefreshControl refreshing={refreshingProducts} onRefresh={() =>onRefreshProducts(showFavoritesOnly)} />
+            }
+            renderItem={({ item }) => {
+              return (
+                <ProductCard
+                  onPress={() => navigation.navigate("EditProduct", {productId:item.id})}
+                  product={item}
+                  hidden={item.id == 0}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => item?.Id?.toString() ?? index.toString()}
+          /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
       </SafeAreaView>
     </View>
   );
 }
 
 function FillOdd(data: any, columns: number) {
+
   while (data.length % columns != 0) {
     data.push(Object.create(data[0]));
-    data[data.length - 1].Id = 0;
+    data[data.length - 1].id = 0;
   }
   return data;
 }
 
-function OnSearch() { }
+
 
 const styles = StyleSheet.create({
   title: {
@@ -159,5 +221,13 @@ const styles = StyleSheet.create({
   },
   emptyItem: {
     backgroundColor: "transparent",
+  },
+
+  favOnlyContainer: {
+    display: "flex",
+    alignSelf: "flex-end",
+    marginHorizontal: 20,
+    marginTop: -10,
+    marginBottom: 10,
   },
 });

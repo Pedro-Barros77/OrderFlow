@@ -1,18 +1,9 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using OrderFlow.Business.Config;
 using OrderFlow.Business.DTO;
-using OrderFlow.Business.Enums;
-using OrderFlow.Business.Interfaces.Repositories;
 using OrderFlow.Business.Interfaces.Services;
 using OrderFlow.Business.Models;
-using OrderFlow.Business.Services;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace OrderFlow.Api.Controllers
@@ -38,9 +29,10 @@ namespace OrderFlow.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<bool>> GetCategories([FromQuery] int categoryId)
+        public async Task<ActionResult<bool>> GetCategoryById([FromQuery] int categoryId)
         {
-            return CustomResponse();
+            var category = await _service.GetById(categoryId);
+            return CustomResponse(category);
         }
 
         [HttpPost]

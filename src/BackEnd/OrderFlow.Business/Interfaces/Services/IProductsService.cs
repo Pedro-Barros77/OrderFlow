@@ -11,5 +11,6 @@ namespace OrderFlow.Business.Interfaces.Services
         Task<Product> AddProduct(Product value);
         Task<bool> DeleteProduct(int value);
         Task<Product> UpdateProduct(Product value);
+        Task<Product> GetById(int id);
     }
 }

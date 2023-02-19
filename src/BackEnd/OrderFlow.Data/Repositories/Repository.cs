@@ -9,7 +9,6 @@ using System.Threading;
 using OrderFlow.Data.Context;
 using OrderFlow.Business.Interfaces;
 using OrderFlow.Business.Models;
-using OrderFlow.Business.Enums;
 
 namespace OrderFlow.Data.Repositories
 {

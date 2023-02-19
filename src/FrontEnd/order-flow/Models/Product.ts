@@ -2,30 +2,33 @@ import { CategoryColor, CategoryIcons } from "../constants/Enums";
 import { Category } from "./Category";
 
 export class Product {
-  Id: number = 0;
-  Name: string = "";
-  CategoryId: number = 1;
-  Category: Category = new Category(0, "Outros", CategoryColor.gray, CategoryIcons.question);
-  Price: number = 0;
-  ImageUrl: string = "";
-  IsFavorite: boolean = false;
+  id: number = 0;
+  title: string = "";
+  description:string = "";
+  categoryId: number = 1;
+  category: Category = new Category(0, "Outros", CategoryColor.gray, CategoryIcons.question);
+  price: number = 0;
+  imageUrl: string = "";
+  isFavorite: boolean = false;
 
   constructor(
     id: number,
-    name: string,
+    title: string,
+    description: string,
     category: Category | undefined,
     price: number,
     imageUrl: string,
     isFavorite: boolean
   ) {
-    this.Id = id;
-    this.Name = name;
+    this.id = id;
+    this.title = title;
+    this.description = description;
     if (category) {
-      this.Category = category;
-      this.CategoryId = category.Id;
+      this.category = category;
+      this.categoryId = category.id;
     }
-    this.Price = price;
-    this.ImageUrl = imageUrl;
-    this.IsFavorite = isFavorite;
+    this.price = price;
+    this.imageUrl = imageUrl;
+    this.isFavorite = isFavorite;
   }
 }
