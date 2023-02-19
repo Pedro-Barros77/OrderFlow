@@ -18,6 +18,7 @@ import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import TablesScreen from "../screens/TablesScreen";
 import Products from "../screens/ProductsScreen";
+import TableDetailsScreen from "../screens/TableDetailsScreen";
 import EditProduct from "../screens/EditProductScreen";
 import {
   RootStackParamList,
@@ -64,6 +65,11 @@ function RootNavigator() {
         name="EditProduct"
         component={EditProduct}
         options={{ title: "Novo Produto" }}
+      />
+       <Stack.Screen
+        name="TableDetailsScreen"
+        component={TableDetailsScreen}
+        options={{ title: "Table Details" }}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
