@@ -10,6 +10,8 @@ namespace OrderFlow.Api.Configuration
         {
             CreateMap<Product, PostProduct>().ReverseMap();
             CreateMap<Product, GetProduct>().ReverseMap();
+            CreateMap<Product, PutProduct>().ReverseMap();
+
             CreateMap<Category, GetCategory>().ReverseMap();
             CreateMap<Category, PostCategory>().ReverseMap();
             CreateMap<Category, PutCategory>().ReverseMap();

@@ -9,10 +9,12 @@ const CategoryCard = (props: {
   colorTheme?: CategoryColor;
   catIcon?: string;
   hidden?: boolean;
+  onPress?: (() => void)
 }) => {
   return props.hidden ? <View style={{width:"47.5%"}}></View> : (
     
     <TouchableOpacity
+    onPress={props.onPress}
     activeOpacity={.7}
       style={[
         styles.container,

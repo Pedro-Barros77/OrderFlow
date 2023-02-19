@@ -11,6 +11,7 @@ import { Product } from '../models/Product';
 const ProductCard = (props: {
   product: Product;
   hidden?: boolean;
+  onPress?: (() => void);
 }) => {
 
   const formatter = new Intl.NumberFormat('pt-BR', {
@@ -22,28 +23,28 @@ const ProductCard = (props: {
   return props.hidden ? (
     <View style={{ width: "30%" }}></View>
   ) : (
-    <TouchableOpacity activeOpacity={0.7} style={styles.container}>
+    <TouchableOpacity activeOpacity={0.7} style={styles.container} onPress={props.onPress}>
       <View
-        style={[styles.imgContaier, { backgroundColor: GetCategoryColor(props.product.Category?.ColorTheme, true) }]}>
-        {props.product.IsFavorite ?
+        style={[styles.imgContaier, { backgroundColor: GetCategoryColor(props.product.category?.colorTheme, true) }]}>
+        {props.product.isFavorite ?
           <AntDesign style={styles.star} name="star" size={15} color={Colors.app.yellowStar} />
           :
           <></>
         }
 
         <CategoryIcon
-          catIcon={props.product.Category?.CategoryIcon}
+          catIcon={props.product.category?.categoryIcon}
           size={50}
-          color={GetCategoryColor(props.product.Category?.ColorTheme, false)}
+          color={GetCategoryColor(props.product.category?.colorTheme, false)}
         ></CategoryIcon>
       </View>
 
       <View style={styles.textContainer}>
         <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit>
-          {props.product.Name}
+          {props.product.title}
         </Text>
         <Text style={styles.price} numberOfLines={1} adjustsFontSizeToFit>
-          {formatter.format(props.product.Price ?? 0).replace("$", "$ ")}
+          {formatter.format(props.product.price ?? 0).replace("$", "$ ")}
         </Text>
       </View>
 
