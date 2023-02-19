@@ -6,8 +6,5 @@ using System.Threading.Tasks;
 
 namespace OrderFlow.Business.Enums
 {
-    public enum Icons
-    {
-        Drink = 1
-    }
+    
 }

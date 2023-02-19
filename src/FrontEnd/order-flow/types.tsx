@@ -18,6 +18,7 @@ export type RootStackParamList = {
   Modal: undefined;
   NotFound: undefined;
   TableDetailsScreen: {tableid: number, tabletotal:number, tablestatus: boolean};
+  EditProduct: {productId:number};
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

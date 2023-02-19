@@ -1,5 +1,6 @@
 ﻿using OrderFlow.Business.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace OrderFlow.Business.Models
 {
@@ -9,6 +10,10 @@ namespace OrderFlow.Business.Models
         public string Description { get; set; }
         public decimal Price { get; set; }
         public string ImageURL { get; set; }
-        public Icons Icon { get; set; }
+        public virtual List<Item> Items { get; set; }
+        public bool IsFavorite { get; set; }
+        public Category Category { get; set; }
+        public int CategoryId { get; set; }
+
     }
 }
