@@ -1,10 +1,9 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Button } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Button, Modal } from 'react-native';
 
 import { RootTabScreenProps } from '../types';
 
 import { useState } from 'react';
 import Table from '../components/Table';
-import TableDetailsScreen from './TableDetailsScreen';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'>) {
@@ -15,7 +14,12 @@ export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'
   ];
 
   const [tables, setTables] = useState(INITIAL_TABLES);
-  
+
+  const handleRemoveTable = (table: { id: any; total: any; status: any; }) => {
+    const newList = tables.filter((item) => item.id !== table.id);
+    setTables(newList);
+  };
+
 
   const AddTable = () => {
     const id = tables.length + 1;
@@ -24,7 +28,7 @@ export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'
   };
 
   const handleTablePress = (table: { id: any; total: any; status: any; }) => {
-    navigation.navigate('TableDetailsScreen', {tableid: table.id, tabletotal: table.total, tablestatus: table.status})
+    navigation.navigate('TableDetailsScreen', { tableid: table.id, tabletotal: table.total, tablestatus: table.status})
   }
 
   return (
@@ -33,15 +37,13 @@ export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'
 
       <View style={styles.tableList}>
         <FlatList data={tables} keyExtractor={(item: any) => item.id.toString()} numColumns={2} renderItem={({ item }) =>
-          <Table id={item.id} total={item.total} status={item.status} onPress={() => handleTablePress(item)} />}
+          <Table id={item.id} total={item.total} status={item.status} onPress={() => handleTablePress(item)} onLongPress={() => handleRemoveTable(item)} />}
         />
       </View>
 
       <TouchableOpacity style={styles.addButton} onPress={AddTable}>
-        <Text style={styles.addButtonText}>+</Text>
+        <Ionicons name="ios-add-circle-outline" size={48} color="#000" />
       </TouchableOpacity>
-
-
     </View >
 
 
@@ -75,7 +77,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#2196F3',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -87,35 +88,27 @@ const styles = StyleSheet.create({
   tableList: {
     flex: 1,
     padding: 10,
-  },
-  deleteModeButton: {
-    backgroundColor: 'red',
-    borderRadius: 25,
-    width: 50,
-    height: 50,
-    alignItems: 'center',
+  }, modalContainer: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  deleteModeButtonText: {
-    color: '#fff',
+  modalTitle: {
     fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
-  deleteButtonsContainer: {
+  modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginHorizontal: 10,
-    marginBottom: 10,
   },
-  deleteButton: {
-    borderRadius: 25,
-    width: 150,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+  modalButton: {
+    backgroundColor: '#F44336',
   },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  modalButtonText: {
+    color: '#FFF',
+    fontSize: 24,
+    lineHeight: 24,
+
   },
 });

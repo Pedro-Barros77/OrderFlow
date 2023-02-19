@@ -1,8 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Table from '../components/Table';
-
 
 export default function TableDetailsScreen ({ navigation, route }:any) {
   const { tableid, tabletotal, tablestatus } = route.params;
@@ -14,6 +12,7 @@ export default function TableDetailsScreen ({ navigation, route }:any) {
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.title}>Mesa {tableid}</Text>
+        
       </View>
       <View style={styles.details}>
         <Text style={styles.detailText}>Total consumido até agora:</Text>
