@@ -13,7 +13,7 @@ import { GetAllProducts } from "../services/Products.service";
 import { GetAllCategories } from "../services/Categories.service";
 import { Colors } from "../constants/Colors";
 import ToggleSwitch from "toggle-switch-react-native";
-import { FillOdd } from "../constants/Extensions";
+import { Added, FillOdd } from "../constants/Extensions";
 
 export default function Products({ navigation }: RootTabScreenProps<'Products'>) {
 
@@ -196,20 +196,6 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
       </SafeAreaView>
     </View>
   );
-}
-
-function FillOdd(data: any, columns: number) {
-  while (data.length % columns != 0) {
-    data.push(Object.create(data[0]));
-    data[data.length - 1].id = 0;
-  }
-  return data;
-}
-
-function Added(collection: Array<any>, newItem: any) {
-  const coll = [...collection];
-  coll.push(newItem);
-  return coll;
 }
 
 const styles = StyleSheet.create({
