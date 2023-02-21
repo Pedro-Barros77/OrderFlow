@@ -30,7 +30,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       EditProduct: 'EditProduct',
       EditCategory: 'EditCategory',
       Modal: 'modal',
-      TableDetailsScreen: 'TableDetailsScreen',
+      EditTableScreen: 'EditTableScreen',
       NotFound: '*',
     },
   },

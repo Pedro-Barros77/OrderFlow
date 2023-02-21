@@ -13,6 +13,7 @@ import { GetAllProducts } from "../services/Products.service";
 import { GetAllCategories } from "../services/Categories.service";
 import { Colors } from "../constants/Colors";
 import ToggleSwitch from "toggle-switch-react-native";
+import { FillOdd } from "../constants/Extensions";
 
 export default function Products({ navigation }: RootTabScreenProps<'Products'>) {
 
@@ -210,8 +211,6 @@ function Added(collection: Array<any>, newItem: any) {
   coll.push(newItem);
   return coll;
 }
-
-
 
 const styles = StyleSheet.create({
   title: {

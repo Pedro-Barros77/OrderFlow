@@ -16,6 +16,12 @@ namespace OrderFlow.Api.Configuration
             CreateMap<Category, PostCategory>().ReverseMap();
             CreateMap<Category, PutCategory>().ReverseMap();
 
+            CreateMap<Table, GetTable>().ReverseMap();
+            CreateMap<Table, PostTable>().ReverseMap();
+            CreateMap<Table, PutTable>().ReverseMap();
+
+
+
             //CreateMap<Esquerda, Direita>()
             //    .ForMember(direita => direita.Propriedade, opcoes => opcoes.MapFrom(esquerda => esquerda.Propriedade));
         }

@@ -17,7 +17,7 @@ export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: undefined;
   NotFound: undefined;
-  TableDetailsScreen: {tableid: number, tabletotal:number, tablestatus: boolean};
+  EditTableScreen: {tableId:number, index:number};
   EditProduct: {productId:number};
   EditCategory: {categoryId:number};
 };
