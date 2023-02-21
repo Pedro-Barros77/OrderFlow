@@ -3,8 +3,8 @@ import { CategoryColor, CategoryIcons } from "../constants/Enums";
 export class Category{
     id: number = 0;
     title: string = "";
-    colorTheme: CategoryColor = 0;
-    categoryIcon: CategoryIcons = 0;
+    colorTheme: CategoryColor = 1;
+    categoryIcon: CategoryIcons = 1;
 
     constructor(id: number, title: string, colorTheme: CategoryColor, categoryIcon: CategoryIcons){
         this.id = id;

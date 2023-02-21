@@ -1,4 +1,4 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Dimensions, ActivityIndicator, Modal } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Dimensions, ActivityIndicator, Modal, DeviceEventEmitter } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { MD3LightTheme } from "react-native-paper";
 import { InputOutline } from "react-native-input-outline";
@@ -13,7 +13,6 @@ import { GetAllCategories } from "../services/Categories.service";
 import { Product } from "../models/Product";
 import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {DeviceEventEmitter} from 'react-native'
 
 
 export default function EditProduct({ route, navigation }: any) {

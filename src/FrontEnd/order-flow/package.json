@@ -32,6 +32,7 @@
     "react-dom": "18.1.0",
     "react-native": "0.70.5",
     "react-native-input-outline": "^1.5.2",
+    "react-native-material-menu": "^2.0.0",
     "react-native-paper": "^5.2.0",
     "react-native-paper-dropdown": "^1.0.7",
     "react-native-reanimated": "~2.12.0",
