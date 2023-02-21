@@ -26,7 +26,8 @@ import {
   RootTabScreenProps,
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, UIManager } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import EditCategory from "../screens/EditCategoryScreen";
 
 export const navigationRef = React.createRef<any>();
 
@@ -67,6 +68,11 @@ function RootNavigator() {
         options={{ title: "Novo Produto" }}
       />
       <Stack.Screen
+        name="EditCategory"
+        component={EditCategory}
+        options={{ title: "Nova Categoria" }}
+      />
+       <Stack.Screen
         name="EditTableScreen"
         component={EditTableScreen}
         options={{

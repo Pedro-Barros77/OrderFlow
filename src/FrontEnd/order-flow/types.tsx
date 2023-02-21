@@ -19,6 +19,7 @@ export type RootStackParamList = {
   NotFound: undefined;
   EditTableScreen: {tableId:number, index:number};
   EditProduct: {productId:number};
+  EditCategory: {categoryId:number};
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

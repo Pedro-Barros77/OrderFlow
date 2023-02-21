@@ -6,11 +6,26 @@ export enum CategoryColor {
   purple = 5,
 }
 
-export enum CategoryIcons {
-    question = 1,
-    drinks = 2,
-    meat = 3,
-    portions = 4,
-    desserts = 5,
-  }
+export const CategoryDisplay = {
+  gray: "Cinza",
+  blue: "Azul",
+  orange: "Laranja",
+  yellow: "Amarelo",
+  purple: "Roxo",
+};
 
+export enum CategoryIcons {
+  question = 1,
+  drinks = 2,
+  meat = 3,
+  portions = 4,
+  desserts = 5,
+}
+
+export const IconDisplay = {
+  'question': 'Interrogação',
+  'drinks': 'Bebida',
+  'meat': 'Carne',
+  'portions': 'Fritas',
+  'desserts': 'Bala',
+}
