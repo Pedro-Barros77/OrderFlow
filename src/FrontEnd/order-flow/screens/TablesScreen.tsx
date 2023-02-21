@@ -1,49 +1,71 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Button, Modal } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, RefreshControl, ActivityIndicator, DeviceEventEmitter, } from 'react-native';
 
 import { RootTabScreenProps } from '../types';
 
-import { useState } from 'react';
-import Table from '../components/Table';
+import React, { useState } from 'react';
+import TableCard from '../components/TableCard';
 import { Ionicons } from '@expo/vector-icons';
+import { FillOdd } from '../constants/Extensions';
+import { GetAllTables } from '../services/Tables.service';
+import { Table } from '../models/Table';
+import { Colors } from '../constants/Colors';
 
 export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'>) {
-  const INITIAL_TABLES = [
-    { id: 1, total: 0, status: 'available' },
-    { id: 2, total: 20, status: 'available' },
-    { id: 3, total: 35, status: 'occupied' },
-  ];
+  const [tables, setTables] = useState<Array<Table>>([]);
+  const [refreshingTables, setRefreshingTables] = useState(false);
 
-  const [tables, setTables] = useState(INITIAL_TABLES);
+  React.useEffect(() => {
+    fetchTables();
+    
+    DeviceEventEmitter.addListener('updatedTables', (e)=>{fetchTables(); console.log('1')})
+  }, [])
 
-  const handleRemoveTable = (table: { id: any; total: any; status: any; }) => {
-    const newList = tables.filter((item) => item.id !== table.id);
-    setTables(newList);
-  };
+  async function fetchTables() {
+    return GetAllTables()
+      .then(list => {
+        setTables(list);
+      });
+  }
 
+  const onRefreshTables = React.useCallback(() => {
+    setRefreshingTables(true);
 
-  const AddTable = () => {
-    const id = tables.length + 1;
-    const table = { id, total: 0, status: 'ocuppied' };
-    setTables([...tables, table]);
-  };
+    fetchTables().finally(() => {
+      setRefreshingTables(false);
+    });
+  }, []);
 
-  const handleTablePress = (table: { id: any; total: any; status: any; }) => {
-    navigation.navigate('TableDetailsScreen', { tableid: table.id, tabletotal: table.total, tablestatus: table.status})
+  const handleTablePress = (table: Table, i: number) => {
+    navigation.navigate('EditTableScreen', { tableId: table.id, index:i})
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mesas</Text>
-
       <View style={styles.tableList}>
-        <FlatList data={tables} keyExtractor={(item: any) => item.id.toString()} numColumns={2} renderItem={({ item }) =>
-          <Table id={item.id} total={item.total} status={item.status} onPress={() => handleTablePress(item)} onLongPress={() => handleRemoveTable(item)} />}
-        />
+        {tables.length > 0 ?
+        <FlatList
+          columnWrapperStyle={styles.tableContainer}
+          data={FillOdd(tables, 3)}
+          keyExtractor={(item: any) => item.id.toString()}
+          numColumns={3}
+          refreshControl={
+            <RefreshControl refreshing={refreshingTables} onRefresh={onRefreshTables} />
+          }
+          renderItem={({ item, index }) =>
+            <TableCard
+              id={index + 1}
+              name={item.name}
+              total={item.total}
+              status={item.status}
+              onPress={() => handleTablePress(item, index)}
+              hidden={item.id == 0}
+
+            />}
+            
+        />: <ActivityIndicator size="large" color={Colors.app.tint} />}
       </View>
 
-      <TouchableOpacity style={styles.addButton} onPress={AddTable}>
-        <Ionicons name="ios-add-circle-outline" size={48} color="#000" />
-      </TouchableOpacity>
+      
     </View >
 
 
@@ -62,6 +84,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
   },
+  tableList: {
+    flex: 1,
+    padding: 10,
+  },
+  tableContainer: {
+    justifyContent: 'space-evenly',
+  },
   addButtonContainer: {
     margin: 20,
     flexDirection: 'row',
@@ -71,7 +100,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   addButton: {
-    position: 'absolute',
     bottom: 20,
     right: 20,
     width: 50,
@@ -80,35 +108,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addButtonText: {
-    color: '#FFF',
-    fontSize: 24,
-    lineHeight: 24,
-  },
-  tableList: {
-    flex: 1,
-    padding: 10,
-  }, modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-  },
-  modalButton: {
-    backgroundColor: '#F44336',
-  },
-  modalButtonText: {
-    color: '#FFF',
-    fontSize: 24,
-    lineHeight: 24,
+  buttonImageStyle: {
 
   },
+
 });

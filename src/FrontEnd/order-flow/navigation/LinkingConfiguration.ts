@@ -29,7 +29,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       },
       EditProduct: 'EditProduct',
       Modal: 'modal',
-      TableDetailsScreen: 'TableDetailsScreen',
+      EditTableScreen: 'EditTableScreen',
       NotFound: '*',
     },
   },

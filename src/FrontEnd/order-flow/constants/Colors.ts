@@ -7,7 +7,9 @@ const Colors = {
     black: 'rgb(0,0,0)',
     green: 'rgb(0,255,0)',
     yellow: 'rgb(255,255,0)',
-
+    darkGray: 'rgb(70,70,70)',
+    red:'rgb(255,0,0)',
+    
 
     text: 'rgb(0,0,0)',
     background: 'rgb(255,255,255)',
@@ -19,6 +21,11 @@ const Colors = {
     currencyGreen: 'rgb(82, 140, 73)',
     yellowStar:'rgb(254, 226, 65)',
     redCancel:'rgb(194, 82, 70)',
+
+
+    trasparent7White:'rgba(255,255,255,0.7)',
+    trasparent3Green:'rgba(50,255,81,0.3)',
+    
 
 
     //categories

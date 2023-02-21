@@ -5,7 +5,7 @@
  */
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   NavigationContainer,
   createNavigationContainerRef
@@ -13,12 +13,12 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 
-import {Colors} from "../constants/Colors";
+import { Colors } from "../constants/Colors";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import TablesScreen from "../screens/TablesScreen";
 import Products from "../screens/ProductsScreen";
-import TableDetailsScreen from "../screens/TableDetailsScreen";
+import EditTableScreen from "../screens/EditTableScreen";
 import EditProduct from "../screens/EditProductScreen";
 import {
   RootStackParamList,
@@ -26,11 +26,11 @@ import {
   RootTabScreenProps,
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, UIManager } from "react-native";
 
 export const navigationRef = React.createRef<any>();
 
-export function navigate(name:string, params:any) {
+export function navigate(name: string, params: any) {
   navigationRef.current?.navigate(name, params);
 }
 
@@ -66,10 +66,13 @@ function RootNavigator() {
         component={EditProduct}
         options={{ title: "Novo Produto" }}
       />
-       <Stack.Screen
-        name="TableDetailsScreen"
-        component={TableDetailsScreen}
-        options={{ title: "Table Details" }}
+      <Stack.Screen
+        name="EditTableScreen"
+        component={EditTableScreen}
+        options={{
+          title: "Nova Mesa",
+        }}
+
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
@@ -97,7 +100,8 @@ function BottomTabNavigator() {
         component={TablesScreen}
         options={({ navigation }: RootTabScreenProps<"Tables">) => ({
           title: "Mesas",
-          tabBarIcon: ({ color }) => TabBarIcon({name:"home", color:color}),
+          tabBarIcon: ({ color }) => TabBarIcon({ name: "home", color: color }),
+          headerTitle: (props) => TableHeader(props)
         })}
       />
       <BottomTab.Screen
@@ -105,7 +109,7 @@ function BottomTabNavigator() {
         component={Products}
         options={{
           title: "Produtos",
-          tabBarIcon: ({ color }) => TabBarIcon({name:"shopping-cart", color:color}),
+          tabBarIcon: ({ color }) => TabBarIcon({ name: "shopping-cart", color: color }),
           headerTitle: (props) => ProductsHeader(props)
         }}
       />
@@ -125,17 +129,28 @@ function TabBarIcon(props: {
 
 function ProductsHeader(props: any) {
   const styles = StyleSheet.create({
-    container:{
-      width:"100%",
-      display:"flex",
-      flexDirection:"row",
-      alignItems:"center",
-      justifyContent:"space-between"
+    container: {
+      width: "100%",
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between"
     },
-    title:{
+    title: {
       fontSize: 18,
-      fontWeight:"500",
-    }
+      fontWeight: "500",
+
+    },
+    addButton: {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    text: {
+      marginRight: 5,
+      fontSize: 15,
+      color: Colors.app.tintGreen
+    },
   });
 
   const onCreateProduct = () => {
@@ -145,9 +160,52 @@ function ProductsHeader(props: any) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Produtos</Text>
-      <TouchableOpacity onPress={onCreateProduct}>
+      <TouchableOpacity style={styles.addButton} onPress={onCreateProduct}>
+        <Text style={styles.text} >Add Produto</Text>
+        <MaterialCommunityIcons name="plus-circle" size={35} color={Colors.app.tintGreen} />
+      </TouchableOpacity>
+    </View>
+  );
+
+}
+
+function TableHeader(props: any) {
+  const styles = StyleSheet.create({
+    container: {
+      width: "100%",
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between"
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: "500",
+    },
+    addButton: {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    text: {
+      marginRight: 5,
+      fontSize: 15,
+      color: Colors.app.tintGreen
+    },
+  });
+
+  const onCreateTable = () => {
+    navigate('EditTableScreen', { tableId: 0, index: 0 });
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Mesas</Text>
+      <TouchableOpacity onPress={onCreateTable} style={styles.addButton}>
+        <Text style={styles.text} >Add Mesa</Text>
         <MaterialCommunityIcons name="plus-circle" size={35} color={Colors.app.tintGreen} />
       </TouchableOpacity>
     </View>
   );
 }
+
