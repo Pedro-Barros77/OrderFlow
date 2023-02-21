@@ -19,6 +19,7 @@ export type RootStackParamList = {
   NotFound: undefined;
   TableDetailsScreen: {tableid: number, tabletotal:number, tablestatus: boolean};
   EditProduct: {productId:number};
+  EditCategory: {categoryId:number};
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

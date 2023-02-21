@@ -1,9 +1,8 @@
-import { SafeAreaView, StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, DeviceEventEmitter } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import TextInputBtn from "../components/TextInputBtn";
 import HorizontalDivider from "../components/HorizontalDivider";
 import CategoryCard from "../components/CategoryCard";
-import {DeviceEventEmitter} from 'react-native'
 
 import ShowMore from "../components/ShowMore";
 import ProductCard from "../components/ProductCard";
@@ -52,7 +51,8 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
   React.useEffect(() => {
     fetchCategories();
     fetchProducts();
-    DeviceEventEmitter.addListener('updateProducts', (e)=>fetchProducts())
+    DeviceEventEmitter.addListener('updateProducts', (e) => fetchProducts())
+    DeviceEventEmitter.addListener('updateCategories', (e) => fetchCategories())
   }, [])
 
   React.useEffect(() => {
@@ -109,7 +109,7 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
       )
   }
 
-  function OnSearch() { 
+  function OnSearch() {
   }
 
   function onFavoriteOnlyToggle(isOn: boolean) {
@@ -134,7 +134,7 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
             <FlatList
               columnWrapperStyle={styles.categoryCol}
               contentContainerStyle={{ justifyContent: "center" }}
-              data={FillOdd(currentCategories, 2)}
+              data={FillOdd(Added(currentCategories, new Category(-1, '', 1, 1)), 2)}
               numColumns={2}
               refreshControl={
                 <RefreshControl refreshing={refreshingCategories} onRefresh={onRefreshCategories} />
@@ -142,11 +142,9 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
               renderItem={({ item }) => {
                 return (
                   <CategoryCard
-                    label={item.title}
-                    catIcon={item.categoryIcon}
-                    colorTheme={item.colorTheme}
+                    onPress={() => navigation.navigate("EditCategory", { categoryId: item.id })}
+                    category={item}
                     hidden={item.id == 0}
-
                   />
                 );
               }}
@@ -181,12 +179,12 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
             data={FillOdd(currentProducts, 3)}
             numColumns={3}
             refreshControl={
-              <RefreshControl refreshing={refreshingProducts} onRefresh={() =>onRefreshProducts(showFavoritesOnly)} />
+              <RefreshControl refreshing={refreshingProducts} onRefresh={() => onRefreshProducts(showFavoritesOnly)} />
             }
             renderItem={({ item }) => {
               return (
                 <ProductCard
-                  onPress={() => navigation.navigate("EditProduct", {productId:item.id})}
+                  onPress={() => navigation.navigate("EditProduct", { productId: item.id })}
                   product={item}
                   hidden={item.id == 0}
                 />
@@ -200,12 +198,17 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
 }
 
 function FillOdd(data: any, columns: number) {
-
   while (data.length % columns != 0) {
     data.push(Object.create(data[0]));
     data[data.length - 1].id = 0;
   }
   return data;
+}
+
+function Added(collection: Array<any>, newItem: any) {
+  const coll = [...collection];
+  coll.push(newItem);
+  return coll;
 }
 
 

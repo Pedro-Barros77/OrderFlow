@@ -5,22 +5,25 @@ import { InputOutline } from "react-native-input-outline";
 import { Colors, GetCategoryColor } from "../constants/Colors";
 import DropDown from "react-native-paper-dropdown";
 import { Category } from "../models/Category";
-import { CategoryColor, CategoryIcons } from "../constants/Enums";
+import { CategoryColor, CategoryDisplay, CategoryIcons, IconDisplay } from "../constants/Enums";
 import ToggleSwitch from 'toggle-switch-react-native'
 import { CategoryIcon } from "../constants/Icons";
 import { DeleteProduct, GetProductById, PostProduct, PutProduct } from "../services/Products.service";
-import { GetAllCategories } from "../services/Categories.service";
+import { DeleteCategory, GetAllCategories, GetCategoryById, PostCategory, PutCategory } from "../services/Categories.service";
 import { Product } from "../models/Product";
 import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 
-export default function EditProduct({ route, navigation }: any) {
+export default function EditCategory({ route, navigation }: any) {
 
-  const txtNameRef = useRef(null);
-  const txtPriceRef = useRef(null);
-  const txtDescriptionRef = useRef(null);
-  const [showCategory, setShowCategory] = useState(false);
+  const [title, setTitle] = useState('');
+
+  const [showColor, setShowColor] = useState(false);
+  const [colorTheme, setColorTheme] = useState(CategoryColor.gray);
+
+  const [showIcon, setShowIcon] = useState(false);
+  const [icon, setIcon] = useState(CategoryIcons.question);
 
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -29,44 +32,38 @@ export default function EditProduct({ route, navigation }: any) {
   const [modalButtons, setModalButtons] = useState<"ok" | "okcancel" | "yesno" | "close">("ok");
   const [exitOnCloseModal, setExitOnCloseModal] = useState(false);
 
+  const colorsEnumValues = Object.values(CategoryColor);
+  const themeColors = colorsEnumValues.slice(0, colorsEnumValues.length/2)
+  const themeValues = colorsEnumValues.slice(colorsEnumValues.length/2)
 
-  const [categories, setCategories] = useState<Array<Category>>([]);
-  const defaultCategory = new Category(1, "Outros", CategoryColor.gray, CategoryIcons.question)
+  const colorsMap = themeColors.map(function(item, i) {
+    return {label: (CategoryDisplay as any)[item.toString()], value: themeValues[i]};
+  });
 
-  const [title, setTitle] = useState('');
-  const [categoryId, setCategoryId] = useState('1');
-  const [category, setCategory] = useState<Category>(defaultCategory);
-  const [price, setPrice] = useState(0);
-  const [description, setDescription] = useState('');
-  const [isFavorite, setFavorite] = useState(false);
+  const iconsEnumValues = Object.values(CategoryIcons);
+  const icons = iconsEnumValues.slice(0, iconsEnumValues.length/2)
+  const iconsValues = iconsEnumValues.slice(iconsEnumValues.length/2)
+
+  const iconsMap = icons.map(function(item, i) {
+    return {label: (IconDisplay as any)[item.toString()], value: iconsValues[i]};
+  });
 
 
-  const { productId } = route.params ?? {};
+  const { categoryId } = route.params ?? {};
 
-  function fetchCategories() {
-    GetAllCategories()
-      .then(list => {
-        setCategories(list);
-      });
-  }
-
-  function getProduct(id: number) {
-    GetProductById(id)
-      .then(product => {
-        console.log(product);
-        if (product != null) {
-          setTitle(product.title);
-          setCategoryId(product.categoryId.toString());
-          setCategory(product.category);
-          setPrice(product.price);
-          setDescription(product.description);
-          setFavorite(product.isFavorite);
+  function getCategory(id: number) {
+    GetCategoryById(id)
+      .then(category => {
+        if (category != null) {
+          setTitle(category.title);
+          setColorTheme(category.colorTheme);
+          setIcon(category.categoryIcon);
         }
         else {
           setModalType("error");
           setModalButtons("close");
-          setModalTitle("Produto não encontrado");
-          setModalMessage("O produto que você está tentando editar não foi encontrado na base de dados...");
+          setModalTitle("Categoria não encontrado");
+          setModalMessage("A categoria que você está tentando editar não foi encontrado na base de dados...");
           setShowModal(true);
           setExitOnCloseModal(true);
         }
@@ -79,43 +76,34 @@ export default function EditProduct({ route, navigation }: any) {
 
 
   useEffect(() => {
-    if (productId && productId > 0) {
+    if (categoryId && categoryId > 0) {
       navigation.setOptions({
-        title: "Editar Produto",
+        title: "Editar Categoria",
       });
-      getProduct(productId);
+      getCategory(categoryId);
     }
-
-    fetchCategories();
   }, [])
 
   function ClearForms() {
     setTitle("");
-    setCategoryId("1");
-    setCategory(defaultCategory);
-    setPrice(0);
-    setDescription("");
-    setFavorite(false);
+    setColorTheme(1);
+    setIcon(1);
   }
 
 
-  function onNameChange(value: string) {
+  function onTitleChange(value: string) {
     setTitle(value);
   }
-  function onSelectCategory(value: string) {
-    setCategoryId(value);
-    setCategory(categories.find(x => x.id == Number.parseInt(value))!)
+  function onSelectColor(value: number) {
+    setColorTheme(value)
   }
-  function onPriceChange(value: string) {
-    setPrice(Number.parseFloat(value));
-  }
-  function onDescriptionChange(value: string) {
-    setDescription(value);
+  function onSelectIcon(value: number) {
+    setIcon(value)
   }
 
-  function onGoBack(updatedProducts: boolean = true) {
-    if(updatedProducts)
-      DeviceEventEmitter.emit('updateProducts',  {});
+  function onGoBack(updatedCategories: boolean = true) {
+    if (updatedCategories)
+      DeviceEventEmitter.emit('updateCategories', {});
     ClearForms();
     navigation.goBack();
   }
@@ -132,20 +120,19 @@ export default function EditProduct({ route, navigation }: any) {
     setModalType("warning");
     setModalButtons("yesno");
     setModalTitle("Atenção!");
-    setModalMessage(`Tem certeza que deseja excluir o produto "${title}"?`);
+    setModalMessage(`Tem certeza que deseja excluir a categoria "${title}"?`);
     setShowModal(true);
     setExitOnCloseModal(false);
   }
 
   function onConfirmDelete() {
-    console.log("Excluindo!!!!!!!")
-    DeleteProduct(productId)
+    DeleteCategory(categoryId)
       .then(res => {
         if (res.success) {
           setModalType("info");
           setModalButtons("ok");
           setModalTitle("Sucesso!");
-          setModalMessage("Produto excluído com Sucesso!");
+          setModalMessage("Categoria excluída com Sucesso!");
           setShowModal(true);
           setExitOnCloseModal(true);
         }
@@ -161,16 +148,16 @@ export default function EditProduct({ route, navigation }: any) {
   }
 
   function onSave() {
-    const product = new Product(0, title, description, category, price, "", isFavorite);
+    const category = new Category(0, title, colorTheme, icon);
 
-    if (productId == 0 || productId == undefined) {
-      PostProduct(product)
+    if (categoryId <= 0 || categoryId == undefined) {
+      PostCategory(category)
         .then(res => {
           if (res.success) {
             setModalType("info");
             setModalButtons("ok");
             setModalTitle("Sucesso!");
-            setModalMessage("Produto cadastrado com Sucesso!");
+            setModalMessage("Categoria cadastrada com Sucesso!");
             setShowModal(true);
             ClearForms();
             setExitOnCloseModal(true);
@@ -186,14 +173,14 @@ export default function EditProduct({ route, navigation }: any) {
         });
     }
     else {
-      product.id = productId;
-      PutProduct(product, productId)
+      category.id = categoryId;
+      PutCategory(category, categoryId)
         .then(res => {
           if (res.success) {
             setModalType("info");
             setModalButtons("ok");
             setModalTitle("Sucesso!");
-            setModalMessage("Produto atualizado com Sucesso!");
+            setModalMessage("Categoria atualizada com Sucesso!");
             setShowModal(true);
             setExitOnCloseModal(true);
           }
@@ -212,7 +199,7 @@ export default function EditProduct({ route, navigation }: any) {
   return (
     <SafeAreaView>
 
-        <AppModal onClose={() => {setShowModal(false); if(exitOnCloseModal) onGoBack()}} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => {onConfirmDelete(); if(exitOnCloseModal) onGoBack()}} onNo={() => {setShowModal(false); if(exitOnCloseModal) onGoBack()}} />
+      <AppModal onClose={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => { onConfirmDelete(); if (exitOnCloseModal) onGoBack() }} onNo={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} />
 
 
       <ScrollView>
@@ -221,82 +208,58 @@ export default function EditProduct({ route, navigation }: any) {
 
           <View style={styles.formContainer}>
 
-            <View style={[styles.imgContainer, { backgroundColor: GetCategoryColor(category.colorTheme) }]}>
-              <CategoryIcon catIcon={category.categoryIcon} size={90} color={GetCategoryColor(category.colorTheme, true)}></CategoryIcon>
+            <View style={[styles.imgContainer, { backgroundColor: GetCategoryColor(colorTheme) }]}>
+              <CategoryIcon catIcon={icon} size={90} color={GetCategoryColor(colorTheme, true)}></CategoryIcon>
             </View>
 
             <InputOutline
-              ref={txtNameRef}
               style={styles.input}
               activeColor={Colors.app.tint}
-              placeholder="Nome"
-              onChangeText={onNameChange}
+              placeholder="Titulo"
+              onChangeText={onTitleChange}
               value={title}
-              maxLength={3}
-
-
+              maxLength={50}
             />
 
             <View style={styles.dropdownContainer}>
-              {categories.length > 0 ?
-                <DropDown
-                  label={"Categoria"}
-                  theme={MD3LightTheme}
-                  mode={"outlined"}
-                  visible={showCategory}
-                  showDropDown={() => categories.length > 0 ? setShowCategory(true) : null}
-                  onDismiss={() => setShowCategory(false)}
-                  value={categoryId}
-                  setValue={onSelectCategory}
-                  list={categories.map(x => ({ label: x.title, value: x.id.toString() }))}
-                  activeColor={Colors.app.tintGreen}
-                  dropDownStyle={styles.dropDownBox}
-                  dropDownItemStyle={{ backgroundColor: Colors.app.white }}
-                  dropDownItemSelectedStyle={{ backgroundColor: Colors.app.secondaryTint }}
-                /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
-            </View>
-
-            <InputOutline
-              ref={txtPriceRef}
-              style={styles.input}
-              activeColor={Colors.app.tint}
-              placeholder="Preço"
-              onChangeText={onPriceChange}
-              keyboardType="decimal-pad"
-              maxLength={9}
-              value={price.toString()}
-            />
-
-            <InputOutline
-              ref={txtDescriptionRef}
-              style={[styles.input, { height: 100 }]}
-              activeColor={Colors.app.tint}
-              placeholder="Descrição"
-              onChangeText={onDescriptionChange}
-              numberOfLines={5}
-              textAlignVertical={"top"}
-              value={description}
-
-              multiline={true}
-              maxLength={255}
-            />
-
-            <View style={styles.favoriteContainer}>
-              <ToggleSwitch
-                isOn={isFavorite}
-                onColor={Colors.app.tintGreen}
-                offColor={Colors.app.redCancel}
-                animationSpeed={200}
-                label="Marcar como Favorito"
-                labelStyle={styles.favoriteLabel}
-                size="large"
-                onToggle={isOn => setFavorite(isOn)}
+              <DropDown
+                label={"Cor"}
+                theme={MD3LightTheme}
+                mode={"outlined"}
+                visible={showColor}
+                showDropDown={() => setShowColor(true)}
+                onDismiss={() => setShowColor(false)}
+                value={colorTheme}
+                setValue={onSelectColor}
+                list={colorsMap}
+                activeColor={Colors.app.tintGreen}
+                dropDownStyle={styles.dropDownBox}
+                dropDownItemStyle={{ backgroundColor: Colors.app.white }}
+                dropDownItemSelectedStyle={{ backgroundColor: Colors.app.secondaryTint }}
               />
             </View>
 
-            {productId > 0 ?
+            <View style={styles.dropdownContainer}>
+              <DropDown
+                label={"Icone"}
+                theme={MD3LightTheme}
+                mode={"outlined"}
+                visible={showIcon}
+                showDropDown={() => setShowIcon(true)}
+                onDismiss={() => setShowIcon(false)}
+                value={icon}
+                setValue={onSelectIcon}
+                list={iconsMap}
+                activeColor={Colors.app.tintGreen}
+                dropDownStyle={styles.dropDownBox}
+                dropDownItemStyle={{ backgroundColor: Colors.app.white }}
+                dropDownItemSelectedStyle={{ backgroundColor: Colors.app.secondaryTint }}
+              />
+            </View>
+
+            {categoryId > 0 ?
               <TouchableOpacity style={styles.btnDelete} activeOpacity={0.7} onPress={onDelete}>
-                <Text style={styles.labelDelete}>Excluir Produto</Text>
+                <Text style={styles.labelDelete}>Excluir Categoria</Text>
                 <MaterialCommunityIcons style={styles.iconDelete} name="trash-can-outline" size={24} color={Colors.app.white} />
               </TouchableOpacity>
               : null}
