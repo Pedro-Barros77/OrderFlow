@@ -19,7 +19,6 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
 
   const txtProductsRef = useRef(null);
   const [txtProductsValue, setText] = useState("");
-  const [error, setError] = useState<string | undefined>(undefined);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(true);
   const [refreshingProducts, setRefreshingProducts] = React.useState(false);
   const [refreshingCategories, setRefreshingCategories] = React.useState(false);
@@ -191,7 +190,7 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
                 />
               );
             }}
-            keyExtractor={(item, index) => item?.Id?.toString() ?? index.toString()}
+            keyExtractor={(item, index) => item?.id?.toString()}
           /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
       </SafeAreaView>
     </View>

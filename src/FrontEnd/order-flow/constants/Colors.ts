@@ -21,6 +21,7 @@ const Colors = {
     currencyGreen: 'rgb(82, 140, 73)',
     yellowStar:'rgb(254, 226, 65)',
     redCancel:'rgb(194, 82, 70)',
+    defaultBackgroundGray:'rgb(242, 242, 242)',
 
 
     trasparent7White:'rgba(255,255,255,0.7)',
@@ -43,7 +44,7 @@ const Colors = {
   }
 };
 
-function GetCategoryColor(catColor?: CategoryColor,isSecondary?: boolean): string {
+function GetCategoryColor(catColor?: CategoryColor, isSecondary?: boolean): string {
   switch (catColor) {
     case CategoryColor.blue:
       return isSecondary

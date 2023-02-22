@@ -20,6 +20,7 @@
     "@react-navigation/native-stack": "^6.1.0",
     "expo": "~47.0.12",
     "expo-asset": "~8.7.0",
+    "expo-checkbox": "~2.2.2",
     "expo-constants": "~14.0.2",
     "expo-font": "~11.0.1",
     "expo-linking": "~3.3.0",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
+    "@types/intl": "^1.2.0",
     "@types/react": "~18.0.24",
     "@types/react-native": "~0.70.6",
     "jest": "^26.6.3",
