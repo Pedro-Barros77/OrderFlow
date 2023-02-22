@@ -1,4 +1,4 @@
-import React, { createRef, useState } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, DeviceEventEmitter, UIManager, findNodeHandle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AppModal from '../components/AppModal';
@@ -28,13 +28,11 @@ export default function EditTableScreen({ navigation, route }: any) {
 
   React.useEffect(() => {
     if (isEdit) {
-
       fetchTable();
     }
-
-
   }, [])
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (isEdit) {
       navigation.setOptions({
         title: "Mesa " + PadNumber(index + 1, 2),
@@ -42,8 +40,6 @@ export default function EditTableScreen({ navigation, route }: any) {
       });
 
     }
-
-
   }, [ctxMenuVisible])
 
 

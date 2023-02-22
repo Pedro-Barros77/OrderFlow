@@ -13,11 +13,13 @@ import { DeleteCategory, GetAllCategories, GetCategoryById, PostCategory, PutCat
 import { Product } from "../models/Product";
 import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
 
 
 export default function EditCategory({ route, navigation }: any) {
 
   const [title, setTitle] = useState('');
+  const [ctxMenuVisible, setCtxMenuVisible] = useState(false);
 
   const [showColor, setShowColor] = useState(false);
   const [colorTheme, setColorTheme] = useState(CategoryColor.gray);
@@ -73,8 +75,6 @@ export default function EditCategory({ route, navigation }: any) {
       });
   }
 
-
-
   useEffect(() => {
     if (categoryId && categoryId > 0) {
       navigation.setOptions({
@@ -83,6 +83,43 @@ export default function EditCategory({ route, navigation }: any) {
       getCategory(categoryId);
     }
   }, [])
+
+  useEffect(() => {
+    if (categoryId && categoryId > 0) {
+      navigation.setOptions({
+        title: "Editar Produto",
+        headerRight: headerContextMenu,
+      });
+
+    }
+  }, [ctxMenuVisible])
+
+  function headerContextMenu() {
+    return (
+      <View>
+        <Menu
+          visible={ctxMenuVisible}
+          anchor={
+            <TouchableOpacity onPress={() => setCtxMenuVisible(true)}>
+              <MaterialCommunityIcons name="dots-vertical" size={35} color={Colors.app.tintGreen} />
+            </TouchableOpacity>
+          }
+          onRequestClose={() => setCtxMenuVisible(false)}
+        >
+          <MenuItem onPress={() => onDelete()} style={{ width: '100%' }}>
+            <MaterialCommunityIcons name="delete" size={18} color={Colors.app.redCancel} />
+            <View style={{ width: 7 }} ></View>
+            <Text>Excluir</Text>
+          </MenuItem>
+          <MenuItem onPress={() => ClearForms()}>
+            <MaterialCommunityIcons name="broom" size={18} color={Colors.app.tintGreen} />
+            <View style={{ width: 7 }}></View>
+            <Text>Limpar Itens</Text>
+          </MenuItem>
+        </Menu>
+      </View>
+    );
+  }
 
   function ClearForms() {
     setTitle("");
@@ -257,12 +294,6 @@ export default function EditCategory({ route, navigation }: any) {
               />
             </View>
 
-            {categoryId > 0 ?
-              <TouchableOpacity style={styles.btnDelete} activeOpacity={0.7} onPress={onDelete}>
-                <Text style={styles.labelDelete}>Excluir Categoria</Text>
-                <MaterialCommunityIcons style={styles.iconDelete} name="trash-can-outline" size={24} color={Colors.app.white} />
-              </TouchableOpacity>
-              : null}
 
           </View>
 
