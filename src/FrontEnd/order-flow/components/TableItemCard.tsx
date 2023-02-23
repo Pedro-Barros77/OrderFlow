@@ -43,7 +43,7 @@ const TableItemCard = (props: {
 
 
   function onSelectStatus(value: number) {
-    if(props.onChangeStatus)
+    if (props.onChangeStatus)
       props.onChangeStatus();
     setStatus(value);
     setShowStatus(false);
@@ -66,9 +66,10 @@ const TableItemCard = (props: {
     setCount(count - 1);
   }
 
-  function onTogglePaid(){
-    if(props.onChangePaid)
+  function onTogglePaid() {
+    if (props.onChangePaid)
       props.onChangePaid();
+
 
     setPaid(!paid);
   }
@@ -111,7 +112,14 @@ const TableItemCard = (props: {
 
   return (
     <View style={styles.container}>
+      {paid ?
+        <View style={styles.rectPaid} pointerEvents="none"></View>
+        : null}
+      {paid ?
+        <View style={styles.linepaid}></View>
+        : null}
       <Pressable style={styles.cardButton} onPress={onToggleCard}>
+
         <View style={[styles.imgContainer, { backgroundColor: GetCategoryColor(props.item.product?.category.colorTheme) }]}>
           <CategoryIcon catIcon={props.item.product?.category.categoryIcon} size={60} color={GetCategoryColor(props.item.product?.category.colorTheme, true)}></CategoryIcon>
         </View>
@@ -130,7 +138,7 @@ const TableItemCard = (props: {
                 anchor={
                   <TouchableOpacity style={styles.dropDownContainer} onPress={() => setShowStatus(!showStatus)}>
                     <Text style={styles.dropDownText}>{ItemStatus[status]}</Text>
-                    <Entypo name={`triangle-${showStatus ? "up" : "down"}`} size={20} color={Colors.app.tint} />
+                    <Entypo name={`triangle-${showStatus ? "up" : "down"}`} size={20} color={paid ? Colors.app.gray : Colors.app.tint} />
                   </TouchableOpacity>
                 }
                 onRequestClose={() => setShowStatus(false)}
@@ -152,12 +160,12 @@ const TableItemCard = (props: {
 
         <View style={styles.rightContainer}>
           <View style={styles.countContainer}>
-            <MaterialCommunityIcons onPress={OnMinus} name="minus" size={30} color={Colors.app.tintGreen} />
+            <MaterialCommunityIcons onPress={OnMinus} name="minus" size={30} color={paid ? Colors.app.gray : Colors.app.tint} />
             <Text style={styles.txtCount}>{count}</Text>
-            <MaterialCommunityIcons onPress={OnPlus} name="plus" size={30} color={Colors.app.tintGreen} />
+            <MaterialCommunityIcons onPress={OnPlus} name="plus" size={30} color={paid ? Colors.app.gray : Colors.app.tint} />
           </View>
           <View style={styles.priceContainer}>
-            <Text style={styles.txtPrice}>{formatter.format(getPrice()).replace("$", "$ ")}</Text>
+            <Text style={[styles.txtPrice, { color: paid ? Colors.app.gray : Colors.app.tint }]}>{formatter.format(getPrice()).replace("$", "$ ")}</Text>
           </View>
 
         </View>
@@ -185,7 +193,7 @@ const TableItemCard = (props: {
 
           <View style={styles.discountRow}>
             <View style={styles.inputContainer}>
-              <MaterialCommunityIcons name="sale" size={30} color={Colors.app.tint} />
+              <MaterialCommunityIcons name="sale" size={30} color={paid ? Colors.app.gray : Colors.app.tint} />
               <InputOutline
                 placeholder="Desconto"
                 keyboardType='decimal-pad'
@@ -197,7 +205,7 @@ const TableItemCard = (props: {
               />
             </View>
             <View style={styles.inputContainer}>
-              <MaterialCommunityIcons name="cash-plus" size={30} color={Colors.app.tint} />
+              <MaterialCommunityIcons name="cash-plus" size={30} color={paid ? Colors.app.gray : Colors.app.tint} />
               <InputOutline
                 placeholder="Adicional"
                 keyboardType='decimal-pad'
@@ -248,7 +256,7 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginTop:20,
+    marginTop: 20,
   },
 
   cardButton: {
@@ -432,6 +440,29 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginRight: 10,
     marginLeft: 3,
+  },
+  linepaid: {
+    position: 'absolute',
+    top: 40,
+    zIndex: 999,
+    left: 10,
+    right: 10,
+    alignSelf: 'center',
+    height: 2,
+    backgroundColor: Colors.app.black,
+    alignContent: 'center',
+    alignItems: 'center',
+  },
+
+  rectPaid: {
+    position: 'absolute',
+    zIndex: 998,
+    top: 1,
+    left: 20,
+    right: 20,
+    height: '100%',
+    borderRadius: 13,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
 
 

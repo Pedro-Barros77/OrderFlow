@@ -36,9 +36,9 @@ export default function EditTableScreen({ navigation, route }: any) {
     new Item(1, 1, 2, undefined, undefined, 1, 0, 0, ItemStatus.Pendente, false, ""),
     new Item(2, 1, 2, undefined, undefined, 2, 0, 0, ItemStatus.Preparando, false, ""),
     new Item(3, 1, 2, undefined, undefined, 1, 0, 0, ItemStatus.Pronto, false, "Não acompanha talheres"),
-    new Item(4, 1, 2, undefined, undefined, 3, 0, 0, ItemStatus.Entregue, true, ""),
-    new Item(5, 1, 2, undefined, undefined, 1, 0, 0, ItemStatus.Entregue, true, ""),
-    new Item(6, 1, 2, undefined, undefined, 1, 0, 0, ItemStatus.Entregue, true, ""),
+    // new Item(4, 1, 2, undefined, undefined, 3, 0, 0, ItemStatus.Entregue, true, ""),
+    // new Item(5, 1, 2, undefined, undefined, 1, 0, 0, ItemStatus.Entregue, true, ""),
+    // new Item(6, 1, 2, undefined, undefined, 1, 0, 0, ItemStatus.Entregue, true, ""),
   ]
 
 
