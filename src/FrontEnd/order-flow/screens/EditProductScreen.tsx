@@ -13,7 +13,7 @@ import { GetAllCategories } from "../services/Categories.service";
 import { Product } from "../models/Product";
 import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
 
 export default function EditProduct({ route, navigation }: any) {
 
@@ -29,6 +29,7 @@ export default function EditProduct({ route, navigation }: any) {
   const [modalButtons, setModalButtons] = useState<"ok" | "okcancel" | "yesno" | "close">("ok");
   const [exitOnCloseModal, setExitOnCloseModal] = useState(false);
 
+  const [ctxMenuVisible, setCtxMenuVisible] = useState(false);
 
   const [categories, setCategories] = useState<Array<Category>>([]);
   const defaultCategory = new Category(1, "Outros", CategoryColor.gray, CategoryIcons.question)
@@ -79,14 +80,48 @@ export default function EditProduct({ route, navigation }: any) {
 
   useEffect(() => {
     if (productId && productId > 0) {
-      navigation.setOptions({
-        title: "Editar Produto",
-      });
       getProduct(productId);
     }
 
     fetchCategories();
   }, [])
+
+  useEffect(() => {
+    if (productId && productId > 0) {
+      navigation.setOptions({
+        title: "Editar Produto",
+        headerRight: headerContextMenu,
+      });
+
+    }
+  }, [ctxMenuVisible])
+
+  function headerContextMenu() {
+    return (
+      <View>
+        <Menu
+          visible={ctxMenuVisible}
+          anchor={
+            <TouchableOpacity onPress={() => setCtxMenuVisible(true)}>
+              <MaterialCommunityIcons name="dots-vertical" size={35} color={Colors.app.tintGreen} />
+            </TouchableOpacity>
+          }
+          onRequestClose={() => setCtxMenuVisible(false)}
+        >
+          <MenuItem onPress={() => onDelete()} style={{ width: '100%' }}>
+            <MaterialCommunityIcons name="delete" size={18} color={Colors.app.redCancel} />
+            <View style={{ width: 7 }} ></View>
+            <Text>Excluir</Text>
+          </MenuItem>
+          <MenuItem onPress={() => ClearForms()}>
+            <MaterialCommunityIcons name="broom" size={18} color={Colors.app.tintGreen} />
+            <View style={{ width: 7 }}></View>
+            <Text>Limpar Itens</Text>
+          </MenuItem>
+        </Menu>
+      </View>
+    );
+  }
 
   function ClearForms() {
     setTitle("");
@@ -113,8 +148,8 @@ export default function EditProduct({ route, navigation }: any) {
   }
 
   function onGoBack(updatedProducts: boolean = true) {
-    if(updatedProducts)
-      DeviceEventEmitter.emit('updateProducts',  {});
+    if (updatedProducts)
+      DeviceEventEmitter.emit('updateProducts', {});
     ClearForms();
     navigation.goBack();
   }
@@ -210,7 +245,7 @@ export default function EditProduct({ route, navigation }: any) {
   return (
     <SafeAreaView>
 
-        <AppModal onClose={() => {setShowModal(false); if(exitOnCloseModal) onGoBack()}} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => {onConfirmDelete(); if(exitOnCloseModal) onGoBack()}} onNo={() => {setShowModal(false); if(exitOnCloseModal) onGoBack()}} />
+      <AppModal onClose={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => { onConfirmDelete(); if (exitOnCloseModal) onGoBack() }} onNo={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} />
 
 
       <ScrollView>
@@ -291,13 +326,6 @@ export default function EditProduct({ route, navigation }: any) {
                 onToggle={isOn => setFavorite(isOn)}
               />
             </View>
-
-            {productId > 0 ?
-              <TouchableOpacity style={styles.btnDelete} activeOpacity={0.7} onPress={onDelete}>
-                <Text style={styles.labelDelete}>Excluir Produto</Text>
-                <MaterialCommunityIcons style={styles.iconDelete} name="trash-can-outline" size={24} color={Colors.app.white} />
-              </TouchableOpacity>
-              : null}
 
           </View>
 
