@@ -29,7 +29,7 @@ export default function Products({ route, navigation }: any) {
   const [currentProducts, setCurrentProducts] = useState<Array<Product>>([]);
   const [products, setProducts] = useState<Array<Product>>([]);
 
-  const { isSelect, onGoBack } = route.params ?? {};
+  const { tableId, index, isSelect } = route.params ?? {};
 
 
   async function fetchCategories() {
@@ -115,7 +115,7 @@ export default function Products({ route, navigation }: any) {
   }
 
   function onAddToTable(productId: number){
-    navigation.navigate("EditTableScreen", {productId: productId});
+    navigation.navigate("EditTableScreen", {tableId: tableId, index: index, productId: productId});
   }
 
   function onFavoriteOnlyToggle(isOn: boolean) {

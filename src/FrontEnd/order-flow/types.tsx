@@ -20,7 +20,7 @@ export type RootStackParamList = {
   EditTableScreen: {tableId:number, index:number, productId: number};
   EditProduct: {productId:number};
   EditCategory: {categoryId:number};
-  SelectProduct: {isSelect: boolean};
+  SelectProduct: {tableId: number, index: number, isSelect: boolean};
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

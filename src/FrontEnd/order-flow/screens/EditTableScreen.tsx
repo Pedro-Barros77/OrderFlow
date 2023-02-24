@@ -14,18 +14,17 @@ import { Item } from '../models/Item';
 import { ItemStatus } from '../constants/Enums';
 import TableItemCard from '../components/TableItemCard';
 import { GetProductById } from '../services/Products.service';
-import { Product } from '../models/Product';
 import HorizontalDivider from '../components/HorizontalDivider';
-import { Category } from '../models/Category';
 
 export default function EditTableScreen({ navigation, route }: any) {
   const { tableId, index, productId } = route.params;
+  const isEdit = tableId && tableId > 0
+
   const [name, setName] = useState('');
   const [total, setTotal] = useState(0);
   const [table, setTable] = useState<Table | null>(null);
+  const [items, setItems] = useState<Array<Item>>([]);
   const [ctxMenuVisible, setCtxMenuVisible] = useState(false);
-  const isEdit = tableId && tableId > 0
-
   const [refreshingItems, setRefreshingItems] = React.useState(false);
 
   const [showModal, setShowModal] = useState(false);
@@ -35,34 +34,10 @@ export default function EditTableScreen({ navigation, route }: any) {
   const [modalButtons, setModalButtons] = useState<"ok" | "okcancel" | "yesno" | "close">("ok");
   const [exitOnCloseModal, setExitOnCloseModal] = useState(false);
 
-  const p = new Product(1, "", "", new Category(1, "", 1, 1), 0, "", false);
-  const t = new Table(1,"", 0, []);
-
-  const items_teste = [
-    new Item(1, 1, 2, p, t, 1, 0, 6, ItemStatus.Pendente, false, ""),
-    new Item(2, 1, 2, p, t, 4, 5.5, 0, ItemStatus.Preparando, false, ""),
-    new Item(3, 1, 2, p, t, 1, 0, 0, ItemStatus.Pronto, false, "Não acompanha talheres"),
-    new Item(4, 1, 2, p, t, 1, 0, 0, ItemStatus.Entregue, true, ""),
-    // new Item(5, 1, 2, undefined, undefined, 1, 0, 0, ItemStatus.Entregue, true, ""),
-    // new Item(6, 1, 2, undefined, undefined, 1, 0, 0, ItemStatus.Entregue, true, ""),
-  ]
-  const [items, setItems] = useState(items_teste);
-
-
   React.useEffect(() => {
-    //debug
-    let product: Product | undefined;
-    GetProductById(4).then(p => {
-      product = p!;
-
-      items.forEach(item => {
-        item.product = product;
-        item.productId = product!.id;
-      });
-      if (isEdit) {
-        fetchTable();
-      }
-    })
+    if (isEdit) {
+      fetchTable();
+    }
   }, [])
 
   React.useEffect(() => {
@@ -80,6 +55,10 @@ export default function EditTableScreen({ navigation, route }: any) {
 
   React.useEffect(() => {
     setTotal(getTotal());
+    if (table != null) {
+      setName(table.name);
+      setItems(table.items);
+    }
   }, [table]);
 
   function headerContextMenu() {
@@ -109,10 +88,10 @@ export default function EditTableScreen({ navigation, route }: any) {
     );
   }
 
-  async function fetchTable() {
+  function fetchTable() {
     return GetTableById(tableId)
       .then(table => {
-        if(table!.items.length > 0)
+        if (table!.items.length > 0)
           setItems(table!.items);
         setTable(table);
         setName(table!.name)
@@ -158,6 +137,7 @@ export default function EditTableScreen({ navigation, route }: any) {
   }
 
   function getTotal(): number {
+    if(items.length == 0) return 0;
     return items.map(item => item.paid ? 0 : (item.product!.price * item.count) + item.additional - item.discount)
       .reduce((a, b) => a + b) ?? 0;
   }
@@ -167,25 +147,26 @@ export default function EditTableScreen({ navigation, route }: any) {
     setName(name)
   }
 
-  function onAddProduct(){
-    navigation.navigate("SelectProduct", {isSelect: true});
+  function onAddProduct() {
+    navigation.navigate("SelectProduct", { tableId: tableId, index: index, isSelect: true });
   }
 
-  function onProductSelected(){
-    if(productId == undefined || productId <= 0) return;
+  function onProductSelected() {
+    if (productId == undefined || productId <= 0) return;
 
     GetProductById(productId).then(p => {
-      setItems(Added(items, new Item(items.length > 0 ? items[items.length -1].id+1 : 1, p!.id, table!.id, p!, table!, 1, 0,0,ItemStatus.Pendente,false,'')));
-      console.log("Adicionado com sucesso!");
+      setItems(Added(items, new Item(items.length > 0 ? (items[items.length - 1].id + 1)*-1 : -1, p!.id, table!.id, p!, table!, 1, 0, 0, ItemStatus.Pendente, false, '')));
     });
   }
-
+  
   function onCloseOrder() {
-
+    
   }
-
+  
   function onSave() {
     table!.name = name;
+    table!.items = items;
+    table!.paidValue = getTotal();
 
     if (!isEdit) {
       PostTable(table!)
@@ -211,6 +192,13 @@ export default function EditTableScreen({ navigation, route }: any) {
     }
     else {
       table!.id = tableId;
+      table?.items.forEach(item => {
+        item.table = undefined;
+        item.product = undefined;
+        item.id = item.id < 0 ? 0 : item.id;
+      });
+      setItems([]);
+
       PutTable(table!, tableId)
         .then(res => {
           if (res.success) {
@@ -225,6 +213,7 @@ export default function EditTableScreen({ navigation, route }: any) {
             setExitOnCloseModal(false);
             modalError();
           }
+          fetchTable();
         })
         .catch(err => {
           setExitOnCloseModal(false);
@@ -416,14 +405,14 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    marginRight:20,
+    marginRight: 20,
   },
 
-  addItemRow:{
+  addItemRow: {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent:"flex-end",
+    justifyContent: "flex-end",
   },
 
 });
