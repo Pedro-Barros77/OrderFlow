@@ -71,15 +71,18 @@ namespace OrderFlow.Business.Services
             if (!IsValid(value)) return value;
 
             result = await _repository.Update(value);
-            if(result != null)
+            if (result == null)
+                return result;
+
+            var oldItems = await _itemsService.GetTableItems(result.Id);
+            var newItems = result.Items;
+            if (oldItems.Count() <= newItems.Count)
+                return result;
+
+            var extraItems = oldItems.Where(p => !newItems.Any(p2 => p2.Id == p.Id));
+            foreach (var item in extraItems)
             {
-                var oldItems = await _itemsService.GetTableItems(result.Id);
-                var newItems = result.Items;
-                var extraItems = oldItems.Where(p => !newItems.Any(p2 => p2.Id == p.Id));
-                foreach ( var item in extraItems )
-                {
-                    await _itemsService.DeleteItem(item.Id);
-                }
+                await _itemsService.DeleteItem(item.Id);
             }
 
             return result;
