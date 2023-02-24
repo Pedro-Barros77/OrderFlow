@@ -51,7 +51,7 @@ namespace OrderFlow.Business.Services
         public async Task<Table> GetById(int id)
         {
             return await _repository.GetQueryable().Where(x => x.Id == id).Include(x => x.Items)
-                .ThenInclude(i => i.Product).FirstOrDefaultAsync();
+                .ThenInclude(i => i.Product).ThenInclude(p => p.Category).FirstOrDefaultAsync();
         }
 
         public async Task <bool> DeleteTable(int value)
