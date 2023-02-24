@@ -17,9 +17,11 @@ namespace OrderFlow.Business.Services
     public class TablesService : BaseService, ITablesService
     {
         private readonly ITablesRepository _repository;
-        public TablesService(IResponseService responseService, ITablesRepository repository) : base(responseService)
+        private readonly IItemsService _itemsService;
+        public TablesService(IResponseService responseService, ITablesRepository repository, IItemsService itemsService) : base(responseService)
         {
             _repository = repository;
+            _itemsService = itemsService;
         }
 
         public async Task<Table> AddTable(Table value)
@@ -28,20 +30,20 @@ namespace OrderFlow.Business.Services
             return await _repository.Add(value);
         }
 
-        
+
         private bool IsValid(Table value)
         {
             Regex regex = new Regex(@"^[\w\s\-à-úÀ-Ú]+$");
             if (value.Name.Length > 50) { AddError("ERRO(Nome deve ser menor que 50 caracteres) "); }
-            if (!regex.IsMatch(value.Name)) { AddError("ERRO(Não é possível adicionar caracteres especiais ao Titulo) "); }         
-            if (value.PaidValue < 0 ) { AddError("ERRO(Preço não pode ser valor negativo) "); }
+            if (!regex.IsMatch(value.Name)) { AddError("ERRO(Não é possível adicionar caracteres especiais ao Titulo) "); }
+            if (value.PaidValue < 0) { AddError("ERRO(Preço não pode ser valor negativo) "); }
             return !HasError();
         }
 
-        
 
 
-        public async Task< IEnumerable<Table>> GetAll()
+
+        public async Task<IEnumerable<Table>> GetAll()
         {
             return await _repository.GetQueryable()
                 .Include(x => x.Items).ThenInclude(i => i.Product)
@@ -54,7 +56,7 @@ namespace OrderFlow.Business.Services
                 .ThenInclude(i => i.Product).ThenInclude(p => p.Category).FirstOrDefaultAsync();
         }
 
-        public async Task <bool> DeleteTable(int value)
+        public async Task<bool> DeleteTable(int value)
         {
             var p = await _repository.GetById(value);
             if (p == null) AddError($"Mesa com ID {value} não existe");
@@ -65,8 +67,22 @@ namespace OrderFlow.Business.Services
 
         public async Task<Table> UpdateTable(Table value)
         {
+            Table result = null;
             if (!IsValid(value)) return value;
-            return await _repository.Update(value);
+
+            result = await _repository.Update(value);
+            if(result != null)
+            {
+                var oldItems = await _itemsService.GetTableItems(result.Id);
+                var newItems = result.Items;
+                var extraItems = oldItems.Where(p => !newItems.Any(p2 => p2.Id == p.Id));
+                foreach ( var item in extraItems )
+                {
+                    await _itemsService.DeleteItem(item.Id);
+                }
+            }
+
+            return result;
         }
     }
 }
