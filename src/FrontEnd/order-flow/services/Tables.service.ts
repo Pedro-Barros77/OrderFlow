@@ -16,7 +16,7 @@ function GetAllTables(): Promise<Array<Table>> {
   return result;
 }
 
-function GetTableById(tableId:number): Promise<Table|null> {
+function GetTableById(tableId: number): Promise<Table | null> {
   const result = fetch(`${API_BaseUrl}/tables?tableId=${tableId}`)
     .then((response) => response.json())
     .then((json) => {
@@ -39,19 +39,19 @@ function PostTable(table: Table): Promise<any> {
     },
     body: JSON.stringify(table),
   })
-  .then((response) => response.json())
-  .then((json) => {
-    return json
-  })
-  .catch((error) => {
-    console.error(error);
-    return false;
-  });
+    .then((response) => response.json())
+    .then((json) => {
+      return json;
+    })
+    .catch((error) => {
+      console.error(error);
+      return false;
+    });
 
   return result;
 }
 
-function PutTable(table: Table, tableId:number): Promise<any> {
+function PutTable(table: Table, tableId: number): Promise<any> {
   const result = fetch(`${API_BaseUrl}/tables?tableId=${tableId}`, {
     method: "PUT",
     headers: {
@@ -60,14 +60,14 @@ function PutTable(table: Table, tableId:number): Promise<any> {
     },
     body: JSON.stringify(table),
   })
-  .then((response) => response.json())
-  .then((json) => {
-    return json
-  })
-  .catch((error) => {
-    console.error(error);
-    return false;
-  });
+    .then((response) => response.json())
+    .then((json) => {
+      return json;
+    })
+    .catch((error) => {
+      console.error(error);
+      return false;
+    });
 
   return result;
 }
@@ -76,14 +76,14 @@ function DeleteTable(tableId: number): Promise<any> {
   const result = fetch(`${API_BaseUrl}/tables?tableId=${tableId}`, {
     method: "DELETE",
   })
-  .then((response) => response.json())
-  .then((json) => {
-    return json
-  })
-  .catch((error) => {
-    console.error(error);
-    return false;
-  });
+    .then((response) => response.json())
+    .then((json) => {
+      return json;
+    })
+    .catch((error) => {
+      console.error(error);
+      return false;
+    });
 
   return result;
 }

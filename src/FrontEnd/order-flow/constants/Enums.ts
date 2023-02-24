@@ -23,9 +23,16 @@ export enum CategoryIcons {
 }
 
 export const IconDisplay = {
-  'question': 'Interrogação',
-  'drinks': 'Bebida',
-  'meat': 'Carne',
-  'portions': 'Fritas',
-  'desserts': 'Bala',
+  question: "Interrogação",
+  drinks: "Bebida",
+  meat: "Carne",
+  portions: "Fritas",
+  desserts: "Bala",
+};
+
+export enum ItemStatus {
+  Pendente = 1,
+  Preparando = 2,
+  Pronto = 3,
+  Entregue = 4,
 }
