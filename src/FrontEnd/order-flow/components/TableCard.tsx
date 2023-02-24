@@ -1,8 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { PadNumber } from '../constants/Extensions';
+import { FormatCurrency, PadNumber } from '../constants/Extensions';
 
 const TableCard = (props: {
   id: any,
@@ -12,12 +11,7 @@ const TableCard = (props: {
   onPress: any,
   hidden: boolean,
 }) => {
-  
 
-  const formatter = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
 
   return props.hidden? <View style={{width:'31%'}}></View>:(
     <View 
@@ -38,7 +32,7 @@ const TableCard = (props: {
           </View>
           <View style={styles.labelsContainer}>
             <Text style={styles.name}>{props.name}</Text>
-            <Text style={styles.total}>{formatter.format(props.total ?? 0).replace("$", "$ ")}</Text>
+            <Text style={styles.total}>{FormatCurrency(props.total ?? 0)}</Text>
           </View>
         </ImageBackground>
       </TouchableOpacity>

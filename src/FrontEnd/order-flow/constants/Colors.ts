@@ -9,6 +9,8 @@ const Colors = {
     yellow: 'rgb(255,255,0)',
     darkGray: 'rgb(70,70,70)',
     red:'rgb(255,0,0)',
+    blue:'rgb(0,0,255)',
+    mediumGreen:'rgb(64, 179, 95)',
     
 
     text: 'rgb(0,0,0)',

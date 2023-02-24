@@ -4,16 +4,16 @@ import { Table } from "./Table";
 
 export class Item {
   id: number = 0;
-  productId: number = 0;
-  tableId: number = 0;
-  product: Product | undefined = undefined;
-  table: Table | undefined = undefined;
   count: number = 0;
   discount: number = 0;
   additional: number = 0;
   status: ItemStatus = ItemStatus.Pendente;
   paid: boolean = false;
   note: string = "";
+  productId: number = 0;
+  tableId: number = 0;
+  product: Product | undefined = undefined;
+  table: Table | undefined = undefined;
 
   public constructor(
     id: number,

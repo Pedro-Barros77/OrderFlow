@@ -1,5 +1,3 @@
-import 'intl';
-import "intl/locale-data/jsonp/pt-BR"
 import { Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View, TouchableOpacity, Animated, Pressable } from "react-native";
 import { Colors, GetCategoryColor } from "../constants/Colors";
@@ -10,26 +8,29 @@ import { useRef, useState } from 'react';
 import { MenuItem, Menu } from 'react-native-material-menu';
 import { InputOutline } from 'react-native-input-outline';
 import Checkbox from 'expo-checkbox';
+import { FormatCurrency } from '../constants/Extensions';
 
 const TableItemCard = (props: {
   item: Item;
-  onToggleCard?: (() => void);
-  onRemove?: (() => void);
-  onChangeCount?: (() => void);
-  onChangeStatus?: (() => void);
-  onChangePaid?: (() => void);
+  onToggleCard?: ((opened: boolean, id: number) => void);
+  onRemove?: ((id: number) => void);
+  onChangeCount?: ((count: number, id: number) => void);
+  onChangeStatus?: ((status: ItemStatus, id: number) => void);
+  onChangePaid?: ((paid: boolean, id: number) => void);
+  onChangeDiscount?: ((value: number, id: number) => void);
+  onChangeAdditional?: ((value: number, id: number) => void);
+  onChangeNote?: ((value: string, id: number) => void);
 }) => {
 
   const [showStatus, setShowStatus] = useState(false);
-  const [status, setStatus] = useState(ItemStatus.Pendente);
-  const [discount, setDiscount] = useState(0);
-  const [additional, setAdditional] = useState(0);
-  const [count, setCount] = useState(1);
-  const [note, setNote] = useState("");
-  const [paid, setPaid] = useState(false);
+  const [status, setStatus] = useState(props.item.status);
+  const [discount, setDiscount] = useState(props.item.discount.toString());
+  const [additional, setAdditional] = useState(props.item.additional.toString());
+  const [count, setCount] = useState(props.item.count);
+  const [note, setNote] = useState(props.item.note);
+  const [paid, setPaid] = useState(props.item.paid);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
-
 
   const [opened, setOpened] = useState(false);
 
@@ -41,54 +42,60 @@ const TableItemCard = (props: {
     return { label: item.toString(), value: statusValues[i].toString() };
   });
 
-
   function onSelectStatus(value: number) {
     if (props.onChangeStatus)
-      props.onChangeStatus();
+      props.onChangeStatus(status, props.item.id);
     setStatus(value);
     setShowStatus(false);
-  }
-
-  function onNoteChange(value: string) {
-    setNote(value);
+    props.item.status = status;
   }
 
   function OnPlus() {
-    if (count >= 99) return;
+    if (count >= 99 || paid) return;
+
     if (props.onChangeCount)
-      props.onChangeCount();
+      props.onChangeCount(count + 1, props.item.id);
+
     setCount(count + 1);
   }
   function OnMinus() {
-    if (count == 1) return;
+    if (count == 1 || paid) return;
+
     if (props.onChangeCount)
-      props.onChangeCount();
+      props.onChangeCount(count - 1, props.item.id);
     setCount(count - 1);
   }
 
   function onTogglePaid() {
-    if (props.onChangePaid)
-      props.onChangePaid();
-
-
-    setPaid(!paid);
+    setPaid((paid) =>
+      (
+        (result) => {
+          if (props.onChangePaid)
+            props.onChangePaid(result, props.item.id);
+          return result;
+        }
+      )(!paid)
+    );
   }
 
   function onToggleCard() {
+    if((fadeAnim as any)._value != 0 && (fadeAnim as any) != 1) return;
+    
     if (props.onToggleCard)
-      props.onToggleCard();
+      props.onToggleCard(opened, props.item.id);
     if (opened) {
+      fadeAnim.addListener((val) => {
+        if (val.value == 0 && opened) {
+          setOpened(false);
+          if (fadeAnim.hasListeners())
+            fadeAnim.removeAllListeners();
+        }
+      })
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 200,
         useNativeDriver: true,
       }).start();
-      fadeAnim.addListener((val) => {
-        if (val.value == 0 && opened) {
-          setOpened(false);
-          fadeAnim.removeAllListeners();
-        }
-      })
       return
     }
 
@@ -101,25 +108,83 @@ const TableItemCard = (props: {
     }).start();
   }
 
-  function getPrice() {
-    return (props.item.product!.price * props.item.count) + props.item.additional - props.item.discount;
+  function onToggleStatus() {
+    setShowStatus(!showStatus);
   }
 
-  const formatter = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
+  function onDiscountChange(value: string) {
+    setDiscount((val) =>
+      (
+        (result) => {
+          if (props.onChangeDiscount)
+            props.onChangeDiscount(Number(result), props.item.id)
+          return result;
+        }
+      )(value)
+    );
+  }
+  function onAdditionalChange(value: string) {
+    setAdditional((val) =>
+      (
+        (result) => {
+          if (props.onChangeAdditional)
+            props.onChangeAdditional(Number(result), props.item.id)
+          return result;
+        }
+      )(value)
+    );
+  }
+  function onNoteChange(value: string) {
+    setNote((val) =>
+      (
+        (result) => {
+          if (props.onChangeNote)
+            props.onChangeNote(result, props.item.id)
+          return result;
+        }
+      )(value)
+    );
+  }
+
+  function onRemove() {
+    if(paid) return;
+    
+    if (props.onRemove) {
+      props.onRemove(props.item.id);
+    }
+  }
+
+  function getPrice(): number {
+    return (props.item.product!.price * count) + Number(additional.replace(',', '.')) - Number(discount.replace(',', '.'));
+  }
+
+  function getStatusIcon() {
+    switch (status) {
+      case ItemStatus.Pendente:
+        return (<MaterialCommunityIcons name="checkbox-blank" size={10} color={Colors.app.redCancel} />)
+      case ItemStatus.Preparando:
+        return (<Entypo name="time-slot" size={12} color={Colors.app.catTheme_orange} />)
+      case ItemStatus.Pronto:
+        return (<MaterialCommunityIcons name="checkbox-blank-circle" size={10} color={Colors.app.mediumGreen} />)
+      case ItemStatus.Entregue:
+        return (<MaterialCommunityIcons name="check-bold" size={14} color={Colors.app.mediumGreen} />)
+    }
+  }
+
+  function getPriceColor() {
+    if (getPrice() < 0) return Colors.app.redCancel;
+    if (paid) return Colors.app.gray;
+    return Colors.app.tint;
+  }
 
   return (
     <View style={styles.container}>
-      {paid ?
-        <View style={styles.rectPaid} pointerEvents="none"></View>
-        : null}
-      {paid ?
-        <View style={styles.linepaid}></View>
-        : null}
       <Pressable style={styles.cardButton} onPress={onToggleCard}>
-
+        {paid ?
+          <View style={styles.rectPaid} pointerEvents="none">
+            <View style={styles.linepaid}></View>
+          </View>
+          : null}
         <View style={[styles.imgContainer, { backgroundColor: GetCategoryColor(props.item.product?.category.colorTheme) }]}>
           <CategoryIcon catIcon={props.item.product?.category.categoryIcon} size={60} color={GetCategoryColor(props.item.product?.category.colorTheme, true)}></CategoryIcon>
         </View>
@@ -136,9 +201,12 @@ const TableItemCard = (props: {
                 style={{ transform: [{ translateY: 35 }] }}
                 visible={showStatus}
                 anchor={
-                  <TouchableOpacity style={styles.dropDownContainer} onPress={() => setShowStatus(!showStatus)}>
-                    <Text style={styles.dropDownText}>{ItemStatus[status]}</Text>
-                    <Entypo name={`triangle-${showStatus ? "up" : "down"}`} size={20} color={paid ? Colors.app.gray : Colors.app.tint} />
+                  <TouchableOpacity disabled={paid} style={styles.dropDownContainer} onPress={onToggleStatus}>
+                    {getStatusIcon()}
+                    <View style={{ display: "flex", flexDirection: "row" }}>
+                      <Text style={styles.dropDownText}>{ItemStatus[status]}</Text>
+                      <Entypo name={`triangle-${showStatus ? "up" : "down"}`} size={20} color={paid ? Colors.app.gray : Colors.app.tint} />
+                    </View>
                   </TouchableOpacity>
                 }
                 onRequestClose={() => setShowStatus(false)}
@@ -160,12 +228,12 @@ const TableItemCard = (props: {
 
         <View style={styles.rightContainer}>
           <View style={styles.countContainer}>
-            <MaterialCommunityIcons onPress={OnMinus} name="minus" size={30} color={paid ? Colors.app.gray : Colors.app.tint} />
+            <MaterialCommunityIcons onPress={OnMinus} name="minus" size={30} color={paid || count == 1 ? Colors.app.gray : Colors.app.tint} />
             <Text style={styles.txtCount}>{count}</Text>
-            <MaterialCommunityIcons onPress={OnPlus} name="plus" size={30} color={paid ? Colors.app.gray : Colors.app.tint} />
+            <MaterialCommunityIcons onPress={OnPlus} name="plus" size={30} color={paid || count == 99 ? Colors.app.gray : Colors.app.tint} />
           </View>
           <View style={styles.priceContainer}>
-            <Text style={[styles.txtPrice, { color: paid ? Colors.app.gray : Colors.app.tint }]}>{formatter.format(getPrice()).replace("$", "$ ")}</Text>
+            <Text style={[styles.txtPrice, { color: getPriceColor() }]}>{FormatCurrency(getPrice())}</Text>
           </View>
 
         </View>
@@ -191,28 +259,35 @@ const TableItemCard = (props: {
 
         }]}>
 
+          {paid ?
+            <View style={[styles.rectPaid, { borderRadius: 0 }]} pointerEvents="none">
+            </View>
+            : null}
+
           <View style={styles.discountRow}>
             <View style={styles.inputContainer}>
               <MaterialCommunityIcons name="sale" size={30} color={paid ? Colors.app.gray : Colors.app.tint} />
               <InputOutline
+                editable={!paid}
                 placeholder="Desconto"
                 keyboardType='decimal-pad'
-                onChangeText={(value) => setDiscount(Number.parseInt(value))}
-                value={formatter.format(discount).replace("R$", "")}
+                onChangeText={onDiscountChange}
+                value={discount}
                 style={styles.input}
-                activeColor={Colors.app.tint}
+                activeColor={paid ? Colors.app.darkGray : Colors.app.tint}
                 paddingVertical={8}
               />
             </View>
             <View style={styles.inputContainer}>
               <MaterialCommunityIcons name="cash-plus" size={30} color={paid ? Colors.app.gray : Colors.app.tint} />
               <InputOutline
+                editable={!paid}
                 placeholder="Adicional"
                 keyboardType='decimal-pad'
-                onChangeText={(value) => setAdditional(Number.parseInt(value))}
-                value={formatter.format(additional).replace("R$", "")}
+                onChangeText={onAdditionalChange}
+                value={additional}
                 style={styles.input}
-                activeColor={Colors.app.tint}
+                activeColor={paid ? Colors.app.darkGray : Colors.app.tint}
                 paddingVertical={8}
               />
             </View>
@@ -220,14 +295,15 @@ const TableItemCard = (props: {
           </View>
           <View style={styles.noteRow}>
             <InputOutline
+              editable={!paid}
               style={[styles.input, { height: "100%", width: "95%" }]}
-              activeColor={Colors.app.tint}
               placeholder="Observação"
               onChangeText={onNoteChange}
               numberOfLines={5}
               textAlignVertical={"top"}
               value={note}
               multiline={true}
+              activeColor={paid ? Colors.app.darkGray : Colors.app.tint}
               maxLength={255}
             />
 
@@ -240,7 +316,7 @@ const TableItemCard = (props: {
                 value={paid}
                 onValueChange={onTogglePaid} />
             </View>
-            <TouchableOpacity activeOpacity={0.7} style={styles.removeContainer} onPress={props.onRemove}>
+            <TouchableOpacity activeOpacity={0.7} style={styles.removeContainer} onPress={onRemove}>
               <MaterialCommunityIcons name="trash-can-outline" size={24} color={Colors.app.redCancel} />
               <Text style={styles.removeLabel}>Remover</Text>
             </TouchableOpacity>
@@ -323,7 +399,6 @@ const styles = StyleSheet.create({
   dropDownContainer: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
     paddingTop: 10,
     height: 30,
@@ -336,6 +411,7 @@ const styles = StyleSheet.create({
   dropDownText: {
     color: Colors.app.darkGray,
     fontSize: 13,
+    marginLeft: 5,
   },
 
   rightContainer: {
@@ -443,25 +519,20 @@ const styles = StyleSheet.create({
   },
   linepaid: {
     position: 'absolute',
-    top: 40,
-    zIndex: 999,
-    left: 10,
-    right: 10,
-    alignSelf: 'center',
+    top: "50%",
+    width: "106%",
+    left: "-3%",
+    zIndex: 11,
     height: 2,
     backgroundColor: Colors.app.black,
-    alignContent: 'center',
-    alignItems: 'center',
   },
 
   rectPaid: {
     position: 'absolute',
-    zIndex: 998,
-    top: 1,
-    left: 20,
-    right: 20,
+    zIndex: 10,
     height: '100%',
-    borderRadius: 13,
+    width: "100%",
+    borderRadius: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
 

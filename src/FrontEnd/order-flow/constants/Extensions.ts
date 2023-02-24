@@ -1,3 +1,6 @@
+import 'intl';
+import "intl/locale-data/jsonp/pt-BR";
+
 function PadNumber(value: number, count: number | undefined): string {
   if (count == undefined) count = 2;
 
@@ -13,9 +16,19 @@ function FillOdd(data: any, columns: number) {
 }
 
 function Added(collection: Array<any>, newItem: any) {
+  if(newItem == null || newItem == undefined) return collection;
   const coll = [...collection];
   coll.push(newItem);
   return coll;
 }
 
-export { PadNumber, FillOdd, Added };
+const Formatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+});
+
+function FormatCurrency(value: number){
+  return Formatter.format(value).replace("$", "$ ");
+}
+
+export { PadNumber, FillOdd, Added, Formatter, FormatCurrency};

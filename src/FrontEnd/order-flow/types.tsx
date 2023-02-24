@@ -17,9 +17,10 @@ export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: undefined;
   NotFound: undefined;
-  EditTableScreen: {tableId:number, index:number};
+  EditTableScreen: {tableId:number, index:number, productId: number};
   EditProduct: {productId:number};
   EditCategory: {categoryId:number};
+  SelectProduct: {isSelect: boolean};
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
@@ -29,7 +30,7 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 
 export type RootTabParamList = {
   Tables: undefined;
-  Products: undefined;
+  Products: {isSelect: boolean};
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<

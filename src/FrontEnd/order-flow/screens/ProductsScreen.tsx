@@ -8,14 +8,14 @@ import ShowMore from "../components/ShowMore";
 import ProductCard from "../components/ProductCard";
 import { Category } from "../models/Category";
 import { Product } from "../models/Product";
-import { RootTabScreenProps } from "../types";
+import { RootStackScreenProps, RootTabScreenProps } from "../types";
 import { GetAllProducts } from "../services/Products.service";
 import { GetAllCategories } from "../services/Categories.service";
 import { Colors } from "../constants/Colors";
 import ToggleSwitch from "toggle-switch-react-native";
 import { Added, FillOdd } from "../constants/Extensions";
 
-export default function Products({ navigation }: RootTabScreenProps<'Products'>) {
+export default function Products({ route, navigation }: any) {
 
   const txtProductsRef = useRef(null);
   const [txtProductsValue, setText] = useState("");
@@ -28,6 +28,8 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
 
   const [currentProducts, setCurrentProducts] = useState<Array<Product>>([]);
   const [products, setProducts] = useState<Array<Product>>([]);
+
+  const { isSelect, onGoBack } = route.params ?? {};
 
 
   async function fetchCategories() {
@@ -112,6 +114,10 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
   function OnSearch() {
   }
 
+  function onAddToTable(productId: number){
+    navigation.navigate("EditTableScreen", {productId: productId});
+  }
+
   function onFavoriteOnlyToggle(isOn: boolean) {
     setShowFavoritesOnly(isOn);
     setCurrentProducts(products.filter((p) => isOn ? p.isFavorite : true));
@@ -134,7 +140,7 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
             <FlatList
               columnWrapperStyle={styles.categoryCol}
               contentContainerStyle={{ justifyContent: "center" }}
-              data={FillOdd(Added(currentCategories, new Category(-1, '', 1, 1)), 2)}
+              data={FillOdd(Added(currentCategories, isSelect ? null : new Category(-1, '', 1, 1)), 2)}
               numColumns={2}
               refreshControl={
                 <RefreshControl refreshing={refreshingCategories} onRefresh={onRefreshCategories} />
@@ -142,7 +148,7 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
               renderItem={({ item }) => {
                 return (
                   <CategoryCard
-                    onPress={() => navigation.navigate("EditCategory", { categoryId: item.id })}
+                    onPress={() => isSelect ? null : navigation.navigate("EditCategory", { categoryId: item.id })}
                     category={item}
                     hidden={item.id == 0}
                   />
@@ -184,7 +190,8 @@ export default function Products({ navigation }: RootTabScreenProps<'Products'>)
             renderItem={({ item }) => {
               return (
                 <ProductCard
-                  onPress={() => navigation.navigate("EditProduct", { productId: item.id })}
+                  onPress={() => isSelect ? onAddToTable(item.id) : navigation.navigate("EditProduct", { productId: item.id })}
+                  onAdd={() => onAddToTable(item.id)}
                   product={item}
                   hidden={item.id == 0}
                 />

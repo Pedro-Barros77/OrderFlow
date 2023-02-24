@@ -31,6 +31,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       EditCategory: 'EditCategory',
       Modal: 'modal',
       EditTableScreen: 'EditTableScreen',
+      SelectProduct: 'SelectProduct',
       NotFound: '*',
     },
   },

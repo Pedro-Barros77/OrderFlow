@@ -72,13 +72,19 @@ function RootNavigator() {
         component={EditCategory}
         options={{ title: "Nova Categoria" }}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="EditTableScreen"
         component={EditTableScreen}
         options={{
           title: "Nova Mesa",
         }}
-
+      />
+      <Stack.Screen
+        name="SelectProduct"
+        component={Products}
+        options={{
+          title: "Selecione o Produto",
+        }}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
