@@ -52,11 +52,12 @@ namespace OrderFlow.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<Table>> UpdateTable([FromQuery] int tableId, [FromBody] Table table)
+        public async Task<ActionResult<Table>> UpdateTable([FromQuery] int tableId, [FromBody] PutTable table)
         {
-            if (tableId != table.Id) _responseService.DivergentId(tableId, table.Id);
-            if (HasError()) return CustomResponse(table);
-            var result = await _service.UpdateTable(table);
+            var _table = _mapper.Map<Table>(table);
+            if (tableId != table.Id) _responseService.DivergentId(tableId, _table.Id);
+            if (HasError()) return CustomResponse(_table);
+            var result = await _service.UpdateTable(_table);
             return CustomResponse(result);
             
         }
