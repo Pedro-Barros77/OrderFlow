@@ -155,7 +155,7 @@ export default function EditTableScreen({ navigation, route }: any) {
     if (productId == undefined || productId <= 0) return;
 
     GetProductById(productId).then(p => {
-      setItems(Added(items, new Item(items.length > 0 ? (items[items.length - 1].id + 1)*-1 : -1, p!.id, table!.id, p!, table!, 1, 0, 0, ItemStatus.Pendente, false, '')));
+      setItems(Added(items, new Item(items.length > 0 ? -Math.abs(items[items.length - 1].id + 1) : -1, p!.id, table!.id, p!, table!, 1, 0, 0, ItemStatus.Pendente, false, '')));
     });
   }
   
@@ -196,6 +196,7 @@ export default function EditTableScreen({ navigation, route }: any) {
         item.table = undefined;
         item.product = undefined;
         item.id = item.id < 0 ? 0 : item.id;
+        console.log(item.status);
       });
       setItems([]);
 

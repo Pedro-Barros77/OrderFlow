@@ -44,10 +44,10 @@ const TableItemCard = (props: {
 
   function onSelectStatus(value: number) {
     if (props.onChangeStatus)
-      props.onChangeStatus(status, props.item.id);
+      props.onChangeStatus(value, props.item.id);
     setStatus(value);
     setShowStatus(false);
-    props.item.status = status;
+    props.item.status = value;
   }
 
   function OnPlus() {
