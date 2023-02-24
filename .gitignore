@@ -13,6 +13,8 @@ npm-debug.*
 *.orig.*
 web-build/
 
+.dtbcache*
+
 # macOS
 .DS_Store
 

@@ -17,7 +17,7 @@ export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'
   React.useEffect(() => {
     fetchTables();
     
-    DeviceEventEmitter.addListener('updatedTables', (e)=>{fetchTables(); console.log('1')})
+    DeviceEventEmitter.addListener('updatedTables', (e)=>fetchTables())
   }, [])
 
   async function fetchTables() {
@@ -36,7 +36,7 @@ export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'
   }, []);
 
   const handleTablePress = (table: Table, i: number) => {
-    navigation.navigate('EditTableScreen', { tableId: table.id, index:i})
+    navigation.navigate('EditTableScreen', { tableId: table.id, index:i, productId: 0})
   }
 
   return (

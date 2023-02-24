@@ -19,12 +19,14 @@ namespace OrderFlow.Api.Configuration
             services.AddScoped<IProductsService, ProductsService>();
             services.AddScoped<ICategoriesService, CategoriesService>();
             services.AddScoped<ITablesService, TablesService>();
+            services.AddScoped<IItemsService, ItemsService>();
             #endregion
 
             #region Repositories
             services.AddScoped<IProductsRepository, ProductsRepository>();
             services.AddScoped<ICategoriesRepository, CategoriesRepository>();
             services.AddScoped<ITablesRepository, TablesRepository>();
+            services.AddScoped<IItemsRepository, ItemsRepository>();
             #endregion
 
             return services;

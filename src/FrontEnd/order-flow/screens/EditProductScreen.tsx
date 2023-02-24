@@ -54,7 +54,6 @@ export default function EditProduct({ route, navigation }: any) {
   function getProduct(id: number) {
     GetProductById(id)
       .then(product => {
-        console.log(product);
         if (product != null) {
           setTitle(product.title);
           setCategoryId(product.categoryId.toString());
@@ -173,7 +172,6 @@ export default function EditProduct({ route, navigation }: any) {
   }
 
   function onConfirmDelete() {
-    console.log("Excluindo!!!!!!!")
     DeleteProduct(productId)
       .then(res => {
         if (res.success) {

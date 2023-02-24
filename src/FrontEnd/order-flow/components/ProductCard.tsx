@@ -1,23 +1,17 @@
-import 'intl';
-import "intl/locale-data/jsonp/pt-BR"
 import { AntDesign } from '@expo/vector-icons';
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Colors, GetCategoryColor } from "../constants/Colors";
-import { CategoryColor, CategoryIcons } from "../constants/Enums";
+import { FormatCurrency } from '../constants/Extensions';
 import { CategoryIcon } from "../constants/Icons";
-import { Category } from '../models/Category';
 import { Product } from '../models/Product';
 
 const ProductCard = (props: {
   product: Product;
   hidden?: boolean;
   onPress?: (() => void);
+  onAdd?: (() => void);
 }) => {
 
-  const formatter = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
 
 
   return props.hidden ? (
@@ -44,11 +38,11 @@ const ProductCard = (props: {
           {props.product.title}
         </Text>
         <Text style={styles.price} numberOfLines={1} adjustsFontSizeToFit>
-          {formatter.format(props.product.price ?? 0).replace("$", "$ ")}
+          {FormatCurrency(props.product.price ?? 0)}
         </Text>
       </View>
 
-      <TouchableOpacity activeOpacity={0.7} style={styles.btnAdd}>
+      <TouchableOpacity activeOpacity={0.7} style={styles.btnAdd} onPress={props.onAdd}>
         <Text style={styles.btnAddText}>
           Adicionar
         </Text>
