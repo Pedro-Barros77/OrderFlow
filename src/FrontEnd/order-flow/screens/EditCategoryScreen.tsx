@@ -87,7 +87,7 @@ export default function EditCategory({ route, navigation }: any) {
         OpenModal({
           title: "Ops!...",
           message: "Ocorreu um erro inesperado :(",
-          buttons: [new ModalButton("Fechar", () => {HideModal(); onGoBack()})],
+          buttons: [new ModalButton("Fechar", () => { HideModal(); onGoBack() })],
           styleType: "error"
         });
       });
@@ -164,10 +164,10 @@ export default function EditCategory({ route, navigation }: any) {
     navigation.goBack();
   }
 
-  function modalError() {
+  function modalError(message?: string) {
     OpenModal({
       title: "Ops!...",
-      message: "Ocorreu um erro inesperado :(",
+      message: message ?? "Ocorreu um erro inesperado :(",
       buttons: [new ModalButton("Fechar", () => HideModal())],
       styleType: "error"
     });
@@ -196,7 +196,7 @@ export default function EditCategory({ route, navigation }: any) {
           });
         }
         else {
-          modalError();
+          modalError(res.errors[0]);
         }
       })
       .catch(err => {
@@ -219,7 +219,7 @@ export default function EditCategory({ route, navigation }: any) {
             ClearForms();
           }
           else {
-            modalError();
+            modalError(res.errors[0]);
           }
         })
         .catch(err => {

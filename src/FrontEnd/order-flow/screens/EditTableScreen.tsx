@@ -180,7 +180,7 @@ export default function EditTableScreen({ navigation, route }: any) {
           }
           else {
             console.log(res);
-            modalError();
+            modalError(res.errors[0]);
           }
         })
         .catch(err => {
@@ -263,7 +263,7 @@ export default function EditTableScreen({ navigation, route }: any) {
           });
         }
         else {
-          modalError();
+          modalError(res.errors[0]);
         }
       })
       .catch(err => {
@@ -271,10 +271,10 @@ export default function EditTableScreen({ navigation, route }: any) {
       });
   }
 
-  function modalError() {
+  function modalError(message?: string) {
     OpenModal({
       title: "Ops!...",
-      message: "Ocorreu um erro inesperado :(",
+      message: message ?? "Ocorreu um erro inesperado :(",
       buttons: [new ModalButton("Fechar", () => HideModal())],
       styleType: "error",
     });
