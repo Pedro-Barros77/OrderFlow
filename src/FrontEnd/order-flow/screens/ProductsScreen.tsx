@@ -14,6 +14,7 @@ import { GetAllCategories } from "../services/Categories.service";
 import { Colors } from "../constants/Colors";
 import ToggleSwitch from "toggle-switch-react-native";
 import { Added, FillOdd } from "../constants/Extensions";
+import MaterialCommunityIcons from "@expo/vector-icons/build/MaterialCommunityIcons";
 
 export default function Products({ route, navigation }: any) {
 
@@ -51,8 +52,8 @@ export default function Products({ route, navigation }: any) {
 
 
   React.useEffect(() => {
-    fetchCategories();
-    fetchProducts();
+    onRefreshCategories();
+    onRefreshProducts(showFavoritesOnly);
     DeviceEventEmitter.addListener('updateProducts', (e) => fetchProducts())
     DeviceEventEmitter.addListener('updateCategories', (e) => fetchCategories())
   }, [])
@@ -114,13 +115,48 @@ export default function Products({ route, navigation }: any) {
   function OnSearch() {
   }
 
-  function onAddToTable(productId: number){
-    navigation.navigate("EditTableScreen", {tableId: tableId, index: index, productId: productId});
+  function onAddToTable(productId: number) {
+    navigation.navigate("EditTableScreen", { tableId: tableId, index: index, productId: productId });
   }
 
   function onFavoriteOnlyToggle(isOn: boolean) {
     setShowFavoritesOnly(isOn);
     setCurrentProducts(products.filter((p) => isOn ? p.isFavorite : true));
+  }
+
+  function handleCategory(list: any) {
+    if (refreshingCategories) {
+      return (
+        <ActivityIndicator size="large" color={Colors.app.tint} />
+      )
+    }
+    if (currentCategories.length == 0) {
+      return (
+        <View style={styles.containerEmpytTable}>
+          <Text style={styles.textEmpytTable}>Nenhuma categoria encontrada</Text>
+          <MaterialCommunityIcons name="playlist-remove" size={40} color={Colors.app.redCancel} />
+        </View>
+
+      )
+    }
+    return list
+  }
+  function handleProducts(list: any) {
+    if (refreshingProducts) {
+      return (
+        <ActivityIndicator size="large" color={Colors.app.tint} />
+      )
+    }
+    if (currentProducts.length == 0) {
+      return (
+        <View style={styles.containerEmpytTable}>
+          <Text style={styles.textEmpytTable}>Nenhum produto encontrado</Text>
+          <MaterialCommunityIcons name="cart-remove" size={30} color={Colors.app.redCancel} />
+        </View>
+
+      )
+    }
+    return list
   }
 
   return (
@@ -136,7 +172,7 @@ export default function Products({ route, navigation }: any) {
 
       <ShowMore disabled={currentCategories.length <= 8}>
         <SafeAreaView>
-          {currentProducts.length > 0 ?
+          {handleCategory(
             <FlatList
               columnWrapperStyle={styles.categoryCol}
               contentContainerStyle={{ justifyContent: "center" }}
@@ -155,7 +191,8 @@ export default function Products({ route, navigation }: any) {
                 );
               }}
               keyExtractor={(item, index) => item.id.toString()}
-            /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
+            />)
+          }
         </SafeAreaView>
       </ShowMore>
 
@@ -178,7 +215,7 @@ export default function Products({ route, navigation }: any) {
 
 
       <SafeAreaView style={{ flex: 1 }}>
-        {currentProducts.length > 0 ?
+        {handleProducts(
           <FlatList
             columnWrapperStyle={styles.categoryCol}
             contentContainerStyle={{ justifyContent: "center" }}
@@ -198,7 +235,8 @@ export default function Products({ route, navigation }: any) {
               );
             }}
             keyExtractor={(item, index) => item?.id?.toString()}
-          /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
+          />)
+        }
       </SafeAreaView>
     </View>
   );
@@ -223,5 +261,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: -10,
     marginBottom: 10,
+  },
+  containerEmpytTable:{
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems: 'center',
+  },
+  textEmpytTable: {
+    fontSize: 15,
+    color: Colors.app.redCancel,
+    marginRight: 5,
   },
 });
