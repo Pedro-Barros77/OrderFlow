@@ -8,7 +8,7 @@ import { useRef, useState } from 'react';
 import { MenuItem, Menu } from 'react-native-material-menu';
 import { InputOutline } from 'react-native-input-outline';
 import Checkbox from 'expo-checkbox';
-import { FormatCurrency } from '../constants/Extensions';
+import { FormatCurrency, ValidateNumber } from '../constants/Extensions';
 
 const TableItemCard = (props: {
   item: Item;
@@ -79,8 +79,8 @@ const TableItemCard = (props: {
   }
 
   function onToggleCard() {
-    if((fadeAnim as any)._value != 0 && (fadeAnim as any) != 1) return;
-    
+    if ((fadeAnim as any)._value != 0 && (fadeAnim as any) != 1) return;
+
     if (props.onToggleCard)
       props.onToggleCard(opened, props.item.id);
     if (opened) {
@@ -112,7 +112,10 @@ const TableItemCard = (props: {
     setShowStatus(!showStatus);
   }
 
+  
+
   function onDiscountChange(value: string) {
+    const n = ValidateNumber(value);
     setDiscount((val) =>
       (
         (result) => {
@@ -120,10 +123,11 @@ const TableItemCard = (props: {
             props.onChangeDiscount(Number(result), props.item.id)
           return result;
         }
-      )(value)
+      )(n)
     );
   }
   function onAdditionalChange(value: string) {
+    const n = ValidateNumber(value);
     setAdditional((val) =>
       (
         (result) => {
@@ -131,7 +135,7 @@ const TableItemCard = (props: {
             props.onChangeAdditional(Number(result), props.item.id)
           return result;
         }
-      )(value)
+      )(n)
     );
   }
   function onNoteChange(value: string) {
@@ -147,8 +151,8 @@ const TableItemCard = (props: {
   }
 
   function onRemove() {
-    if(paid) return;
-    
+    if (paid) return;
+
     if (props.onRemove) {
       props.onRemove(props.item.id);
     }

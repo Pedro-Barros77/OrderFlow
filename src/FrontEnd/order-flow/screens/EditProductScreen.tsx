@@ -14,6 +14,7 @@ import { Product } from "../models/Product";
 import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
+import { ValidateNumber } from "../constants/Extensions";
 
 export default function EditProduct({ route, navigation }: any) {
 
@@ -37,7 +38,7 @@ export default function EditProduct({ route, navigation }: any) {
   const [title, setTitle] = useState('');
   const [categoryId, setCategoryId] = useState('1');
   const [category, setCategory] = useState<Category>(defaultCategory);
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [isFavorite, setFavorite] = useState(false);
 
@@ -58,7 +59,7 @@ export default function EditProduct({ route, navigation }: any) {
           setTitle(product.title);
           setCategoryId(product.categoryId.toString());
           setCategory(product.category);
-          setPrice(product.price);
+          setPrice(product.price.toString());
           setDescription(product.description);
           setFavorite(product.isFavorite);
         }
@@ -127,7 +128,7 @@ export default function EditProduct({ route, navigation }: any) {
     setTitle("");
     setCategoryId("1");
     setCategory(defaultCategory);
-    setPrice(0);
+    setPrice('');
     setDescription("");
     setFavorite(false);
   }
@@ -141,7 +142,8 @@ export default function EditProduct({ route, navigation }: any) {
     setCategory(categories.find(x => x.id == Number.parseInt(value))!)
   }
   function onPriceChange(value: string) {
-    setPrice(Number.parseFloat(value));
+    const n = ValidateNumber(value);
+    setPrice(n);
   }
   function onDescriptionChange(value: string) {
     setDescription(value);
@@ -194,7 +196,7 @@ export default function EditProduct({ route, navigation }: any) {
   }
 
   function onSave() {
-    const product = new Product(0, title, description, category, price, "", isFavorite);
+    const product = new Product(0, title, description, category, Number(price), "", isFavorite);
 
     if (productId == 0 || productId == undefined) {
       PostProduct(product)
@@ -297,7 +299,7 @@ export default function EditProduct({ route, navigation }: any) {
               onChangeText={onPriceChange}
               keyboardType="decimal-pad"
               maxLength={9}
-              value={price.toString()}
+              value={price}
             />
 
             <InputOutline

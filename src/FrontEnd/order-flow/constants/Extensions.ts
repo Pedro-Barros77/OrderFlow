@@ -31,5 +31,14 @@ function FormatCurrency(value: number) {
   return Formatter.format(value).replace("$", "$ ");
 }
 
+function ValidateNumber(value: string): string {
+  const _value = value.replace(",", ".");
+  const n = Number(_value);
+  if (isNaN(n) || _value.split(".").length - 1 > 1 || /[a-zA-Z]/g.test(_value)) {
+    console.log("true");
+    return "";
+  }
+  return n.toString();
+}
 
-export { PadNumber, FillOdd, Added, Formatter, FormatCurrency };
+export { PadNumber, FillOdd, Added, Formatter, FormatCurrency, ValidateNumber };
