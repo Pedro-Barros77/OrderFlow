@@ -181,9 +181,13 @@ export default function EditTableScreen({ navigation, route }: any) {
             setExitOnCloseModal(true);
           }
           else {
-            console.log(res);
             setExitOnCloseModal(false);
-            modalError();
+            setModalType("error");
+            setModalButtons("ok");
+            setModalTitle("Ocorreu um erro");
+            setModalMessage(res.errors[0]);
+            setShowModal(true);
+            setExitOnCloseModal(false);
           }
         })
         .catch(err => {
@@ -266,7 +270,13 @@ export default function EditTableScreen({ navigation, route }: any) {
         }
         else {
           setExitOnCloseModal(false);
-          modalError();
+          setExitOnCloseModal(false);
+          setModalType("error");
+          setModalButtons("ok");
+          setModalTitle("Ocorreu um erro");
+          setModalMessage(res.errors[0]);
+          setShowModal(true);
+          setExitOnCloseModal(false);
         }
       })
       .catch(err => {
@@ -442,7 +452,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
   },
-  containerEmpytTable:{
+  containerEmpytTable: {
     alignItems: 'center',
   },
   textEmpytTable: {

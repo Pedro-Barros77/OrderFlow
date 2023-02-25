@@ -186,7 +186,13 @@ export default function EditProduct({ route, navigation }: any) {
         }
         else {
           setExitOnCloseModal(false);
-          modalError();
+          setExitOnCloseModal(false);
+          setModalType("error");
+          setModalButtons("ok");
+          setModalTitle("Ocorreu um erro");
+          setModalMessage(res.errors[0]);
+          setShowModal(true);
+          setExitOnCloseModal(false);
         }
       })
       .catch(err => {
@@ -212,7 +218,13 @@ export default function EditProduct({ route, navigation }: any) {
           }
           else {
             setExitOnCloseModal(false);
-            modalError();
+            setExitOnCloseModal(false);
+            setModalType("error");
+            setModalButtons("ok");
+            setModalTitle("Ocorreu um erro");
+            setModalMessage(res.errors[0]);
+            setShowModal(true);
+            setExitOnCloseModal(false);
           }
         })
         .catch(err => {
