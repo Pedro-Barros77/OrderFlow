@@ -36,7 +36,7 @@ export default function EditTableScreen({ navigation, route }: any) {
 
   React.useEffect(() => {
     if (isEdit) {
-      fetchTable();
+      onRefreshItems()
     }
   }, [])
 
@@ -137,7 +137,7 @@ export default function EditTableScreen({ navigation, route }: any) {
   }
 
   function getTotal(): number {
-    if(items.length == 0) return 0;
+    if (items.length == 0) return 0;
     return items.map(item => item.paid ? 0 : (item.product!.price * item.count) + item.additional - item.discount)
       .reduce((a, b) => a + b) ?? 0;
   }
@@ -158,11 +158,11 @@ export default function EditTableScreen({ navigation, route }: any) {
       setItems(Added(items, new Item(items.length > 0 ? -Math.abs(items[items.length - 1].id + 1) : -1, p!.id, table!.id, p!, table!, 1, 0, 0, ItemStatus.Pendente, false, '')));
     });
   }
-  
+
   function onCloseOrder() {
-    
+
   }
-  
+
   function onSave() {
     table!.name = name;
     table!.items = items;
@@ -196,9 +196,9 @@ export default function EditTableScreen({ navigation, route }: any) {
         item.table = undefined;
         item.product = undefined;
         item.id = item.id < 0 ? 0 : item.id;
-        console.log(item.status);
       });
       setItems([]);
+      setRefreshingItems(true);
 
       PutTable(table!, tableId)
         .then(res => {
@@ -219,7 +219,9 @@ export default function EditTableScreen({ navigation, route }: any) {
         .catch(err => {
           setExitOnCloseModal(false);
           modalError();
-        });
+        }).finally(() => {
+          setRefreshingItems(false)
+        })
     }
   }
 
@@ -278,52 +280,74 @@ export default function EditTableScreen({ navigation, route }: any) {
     setShowModal(true);
   }
 
+  function handleList(list: any) {
+    if (refreshingItems) {
+      return (
+        <ActivityIndicator size="large" color={Colors.app.tint} />
+      )
+    }
+    if (items.length == 0) {
+      return (
+        <View style={styles.containerEmpytTable}>
+          <Text style={styles.textEmpytTable}> Mesa vazia</Text>
+          <MaterialCommunityIcons name="cart-remove" size={60} color={Colors.app.redCancel} />
+        </View>
+
+      )
+    }
+    return list
+  }
+
+
   return (
     <SafeAreaView style={[styles.container, { height: "100%" }]}>
 
       <AppModal onClose={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => { onConfirmDelete(); if (exitOnCloseModal) onGoBack() }} onNo={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} />
 
-      <InputOutline
-        style={styles.input}
-        activeColor={Colors.app.tint}
-        placeholder="Nome"
-        onChangeText={onNameChange}
-        value={name}
-        maxLength={3}
-      />
-      <View style={styles.addItemRow}>
-        <TouchableOpacity style={styles.addItemButton} onPress={onAddProduct}>
-          <Text style={styles.addItemText} >Add Produto</Text>
-          <MaterialCommunityIcons name="plus-circle" size={35} color={Colors.app.tintGreen} />
-        </TouchableOpacity>
+      <View>
+        <InputOutline
+          style={styles.input}
+          activeColor={Colors.app.tint}
+          placeholder="Nome"
+          onChangeText={onNameChange}
+          value={name}
+          maxLength={3}
+        />
+
+        <View style={styles.addItemRow}>
+          <TouchableOpacity style={styles.addItemButton} onPress={onAddProduct}>
+            <Text style={styles.addItemText} >Add Produto</Text>
+            <MaterialCommunityIcons name="plus-circle" size={35} color={Colors.app.tintGreen} />
+          </TouchableOpacity>
+        </View>
+
+        <HorizontalDivider label="Pedidos" />
+        {handleList(
+          <FlatList
+            contentContainerStyle={{ justifyContent: "center" }}
+            data={items}
+            numColumns={1}
+            refreshControl={
+              <RefreshControl refreshing={refreshingItems} onRefresh={onRefreshItems} />
+            }
+            renderItem={({ item }) => {
+              return (
+                <TableItemCard
+                  item={item}
+                  onChangeStatus={updateItemStatus}
+                  onChangeCount={updateItemCount}
+                  onChangeDiscount={updateItemDiscount}
+                  onChangeAdditional={updateItemAdditional}
+                  onChangeNote={updateItemNote}
+                  onChangePaid={updateItemPaid}
+                  onRemove={removeItem}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => item?.id?.toString()}
+          />)
+        }
       </View>
-
-
-      <HorizontalDivider label="Pedidos" />
-      {items.length > 0 ?
-        <FlatList
-          contentContainerStyle={{ justifyContent: "center" }}
-          data={items}
-          numColumns={1}
-          refreshControl={
-            <RefreshControl refreshing={refreshingItems} onRefresh={onRefreshItems} />
-          }
-          renderItem={({ item }) => {
-            return (
-              <TableItemCard
-                item={item}
-                onChangeStatus={updateItemStatus}
-                onChangeCount={updateItemCount}
-                onChangeDiscount={updateItemDiscount}
-                onChangeAdditional={updateItemAdditional}
-                onChangeNote={updateItemNote}
-                onChangePaid={updateItemPaid}
-                onRemove={removeItem}
-              />
-            );
-          }}
-          keyExtractor={(item, index) => item?.id?.toString()}
-        /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
 
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={[styles.button, { backgroundColor: Colors.app.tintGreen }]} onPress={onSave} activeOpacity={.7}>
@@ -414,6 +438,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
+  },
+  containerEmpytTable:{
+    alignItems: 'center',
+  },
+  textEmpytTable: {
+    fontSize: 20,
+    color: Colors.app.redCancel,
   },
 
 });
