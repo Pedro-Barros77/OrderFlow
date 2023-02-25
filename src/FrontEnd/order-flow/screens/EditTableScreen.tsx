@@ -22,7 +22,7 @@ export default function EditTableScreen({ navigation, route }: any) {
 
   const [name, setName] = useState('');
   const [total, setTotal] = useState(0);
-  const [table, setTable] = useState<Table | null>(null);
+  const [table, setTable] = useState<Table | null>(new Table(0, "", 0, []));
   const [items, setItems] = useState<Array<Item>>([]);
   const [ctxMenuVisible, setCtxMenuVisible] = useState(false);
   const [refreshingItems, setRefreshingItems] = React.useState(false);
@@ -181,11 +181,13 @@ export default function EditTableScreen({ navigation, route }: any) {
             setExitOnCloseModal(true);
           }
           else {
+            console.log(res);
             setExitOnCloseModal(false);
             modalError();
           }
         })
         .catch(err => {
+          console.log(err);
           setExitOnCloseModal(false);
           modalError();
         });
@@ -217,6 +219,7 @@ export default function EditTableScreen({ navigation, route }: any) {
           fetchTable();
         })
         .catch(err => {
+          console.log(err);
           setExitOnCloseModal(false);
           modalError();
         });

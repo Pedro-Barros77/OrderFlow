@@ -1,10 +1,9 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, RefreshControl, ActivityIndicator, DeviceEventEmitter, } from 'react-native';
+import { StyleSheet, View, FlatList, RefreshControl, ActivityIndicator, DeviceEventEmitter, } from 'react-native';
 
 import { RootTabScreenProps } from '../types';
 
 import React, { useState } from 'react';
 import TableCard from '../components/TableCard';
-import { Ionicons } from '@expo/vector-icons';
 import { FillOdd } from '../constants/Extensions';
 import { GetAllTables } from '../services/Tables.service';
 import { Table } from '../models/Table';
@@ -39,6 +38,8 @@ export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'
     navigation.navigate('EditTableScreen', { tableId: table.id, index:i, productId: 0})
   }
 
+  
+
   return (
     <View style={styles.container}>
       <View style={styles.tableList}>
@@ -53,10 +54,8 @@ export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'
           }
           renderItem={({ item, index }) =>
             <TableCard
-              id={index + 1}
-              name={item.name}
-              total={item.total}
-              status={item.status}
+            table={item}
+              index={index + 1}
               onPress={() => handleTablePress(item, index)}
               hidden={item.id == 0}
 
