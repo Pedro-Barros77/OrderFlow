@@ -28,8 +28,11 @@ export default function EditTableScreen({ navigation, route }: any) {
   const [items, setItems] = useState<Array<Item>>([]);
   const [ctxMenuVisible, setCtxMenuVisible] = useState(false);
   const [refreshingItems, setRefreshingItems] = React.useState(false);
+  const [hasChanges, setHasChanges] = React.useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [goBackSubscription, setGoBackSubscription] = useState<{unsubscribe: () => void}>({unsubscribe:() => { }})
 
   React.useEffect(() => {
     if (isEdit) {
@@ -37,6 +40,29 @@ export default function EditTableScreen({ navigation, route }: any) {
     }
     InitModal(setModalVisible, setModalVisible);
   }, [])
+
+  React.useEffect(() => {
+    let _unsub = navigation.addListener('beforeRemove', (e: any) => {
+      if (hasChanges) {
+        e.preventDefault();
+        OpenModal({
+          title: "Atenção!",
+          message: "Existem modifições nos produtos que não foram salvas. Deseja descartar?",
+          buttons: [
+            new ModalButton("Sim", () => {
+              HideModal();
+
+              _unsub();
+              onGoBack(false);
+            }),
+            new ModalButton("Cancelar", () => HideModal(), undefined, Colors.app.redCancel),
+          ],
+        });
+      }
+    });
+
+    setGoBackSubscription({unsubscribe:_unsub});
+  }, [hasChanges])
 
   React.useEffect(() => {
     onProductSelected();
@@ -109,29 +135,36 @@ export default function EditTableScreen({ navigation, route }: any) {
   }
   function updateItemStatus(status: ItemStatus, id: number) {
     getItem(id).status = status;
+    setHasChanges(true);
   }
   function updateItemCount(count: number, id: number) {
     getItem(id).count = count;
     setTotal(getTotal());
+    setHasChanges(true);
   }
   function updateItemPaid(paid: boolean, id: number) {
     getItem(id).paid = paid;
     setTotal(getTotal());
+    setHasChanges(true);
   }
   function updateItemDiscount(value: number, id: number) {
     getItem(id).discount = value;
     setTotal(getTotal());
+    setHasChanges(true);
   }
   function updateItemAdditional(value: number, id: number) {
     getItem(id).additional = value;
     setTotal(getTotal());
+    setHasChanges(true);
   }
   function updateItemNote(value: string, id: number) {
     getItem(id).note = value;
+    setHasChanges(true);
   }
   function removeItem(id: number) {
     setItems(items.filter(x => x.id !== id));
     setTotal(getTotal());
+    setHasChanges(true);
   }
 
   function getTotal(): number {
@@ -155,6 +188,7 @@ export default function EditTableScreen({ navigation, route }: any) {
 
     GetProductById(productId).then(p => {
       setItems(Added(items, new Item(items.length > 0 ? -Math.abs(items[items.length - 1].id + 1) : -1, p!.id, table!.id, p!, table!, 1, 0, 0, ItemStatus.Pendente, false, '')));
+      setHasChanges(true);
     });
   }
 
@@ -171,12 +205,14 @@ export default function EditTableScreen({ navigation, route }: any) {
       PostTable(table!)
         .then(res => {
           if (res.success) {
+            setHasChanges(false);
+            if (goBackSubscription)
+              goBackSubscription.unsubscribe();
             OpenModal({
               title: "Sucesso!",
               message: "Mesa cadastrada com Sucesso!",
               buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
             });
-            ClearForms();
           }
           else {
             console.log(res);
@@ -201,7 +237,9 @@ export default function EditTableScreen({ navigation, route }: any) {
       PutTable(table!, tableId)
         .then(res => {
           if (res.success) {
-
+            setHasChanges(false);
+            if (goBackSubscription)
+              goBackSubscription.unsubscribe();
             OpenModal({
               title: "Sucesso!",
               message: "Mesa atualizada com Sucesso!",
@@ -234,7 +272,8 @@ export default function EditTableScreen({ navigation, route }: any) {
   function ClearForms() {
     setName("");
     setTable(null);
-    setCtxMenuVisible(false)
+    setCtxMenuVisible(false);
+    setHasChanges(true);
   }
 
   function onDelete() {
@@ -256,6 +295,9 @@ export default function EditTableScreen({ navigation, route }: any) {
     DeleteTable(tableId)
       .then(res => {
         if (res.success) {
+          setHasChanges(false);
+          if (goBackSubscription)
+            goBackSubscription.unsubscribe();
           OpenModal({
             title: "Sucesso!",
             message: "Mesa excluída com Sucesso!",
