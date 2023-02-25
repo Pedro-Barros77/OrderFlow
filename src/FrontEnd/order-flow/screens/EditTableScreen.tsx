@@ -15,6 +15,8 @@ import { ItemStatus } from '../constants/Enums';
 import TableItemCard from '../components/TableItemCard';
 import { GetProductById } from '../services/Products.service';
 import HorizontalDivider from '../components/HorizontalDivider';
+import { HideModal, InitModal, OpenModal } from '../services/AppModal.service';
+import { ModalButton } from '../models/ModalButton';
 
 export default function EditTableScreen({ navigation, route }: any) {
   const { tableId, index, productId } = route.params;
@@ -27,17 +29,13 @@ export default function EditTableScreen({ navigation, route }: any) {
   const [ctxMenuVisible, setCtxMenuVisible] = useState(false);
   const [refreshingItems, setRefreshingItems] = React.useState(false);
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState<"info" | "warning" | "error">("info");
-  const [modalButtons, setModalButtons] = useState<"ok" | "okcancel" | "yesno" | "close">("ok");
-  const [exitOnCloseModal, setExitOnCloseModal] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   React.useEffect(() => {
     if (isEdit) {
       onRefreshItems()
     }
+    InitModal(setModalVisible, setModalVisible);
   }, [])
 
   React.useEffect(() => {
@@ -152,6 +150,7 @@ export default function EditTableScreen({ navigation, route }: any) {
   }
 
   function onProductSelected() {
+    InitModal(setModalVisible, setModalVisible);
     if (productId == undefined || productId <= 0) return;
 
     GetProductById(productId).then(p => {
@@ -172,23 +171,20 @@ export default function EditTableScreen({ navigation, route }: any) {
       PostTable(table!)
         .then(res => {
           if (res.success) {
-            setModalType("info");
-            setModalButtons("ok");
-            setModalTitle("Sucesso!");
-            setModalMessage("Mesa cadastrada com Sucesso!");
-            setShowModal(true);
+            OpenModal({
+              title: "Sucesso!",
+              message: "Mesa cadastrada com Sucesso!",
+              buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+            });
             ClearForms();
-            setExitOnCloseModal(true);
           }
           else {
             console.log(res);
-            setExitOnCloseModal(false);
             modalError();
           }
         })
         .catch(err => {
           console.log(err);
-          setExitOnCloseModal(false);
           modalError();
         });
     }
@@ -205,22 +201,20 @@ export default function EditTableScreen({ navigation, route }: any) {
       PutTable(table!, tableId)
         .then(res => {
           if (res.success) {
-            setModalType("info");
-            setModalButtons("ok");
-            setModalTitle("Sucesso!");
-            setModalMessage("Mesa atualizada com Sucesso!");
-            setShowModal(true);
-            setExitOnCloseModal(true);
+
+            OpenModal({
+              title: "Sucesso!",
+              message: "Mesa atualizada com Sucesso!",
+              buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+            });
           }
           else {
-            setExitOnCloseModal(false);
             modalError();
           }
           fetchTable();
         })
         .catch(err => {
           console.log(err);
-          setExitOnCloseModal(false);
           modalError();
         }).finally(() => {
           setRefreshingItems(false)
@@ -244,12 +238,17 @@ export default function EditTableScreen({ navigation, route }: any) {
   }
 
   function onDelete() {
-    setModalType("warning");
-    setModalButtons("yesno");
-    setModalTitle("Atenção!");
-    setModalMessage(`Tem certeza que deseja excluir esta mesa?`);
-    setShowModal(true);
-    setExitOnCloseModal(false);
+
+    OpenModal({
+      title: "Atenção!",
+      message: "Tem certeza que deseja excluir esta mesa?",
+      buttons: [
+        new ModalButton("Sim", () => { HideModal(); onConfirmDelete() }),
+        new ModalButton("Não", () => HideModal(), undefined, Colors.app.redCancel),
+      ],
+      styleType: "warning",
+    });
+
     setCtxMenuVisible(false)
   }
 
@@ -257,30 +256,28 @@ export default function EditTableScreen({ navigation, route }: any) {
     DeleteTable(tableId)
       .then(res => {
         if (res.success) {
-          setModalType("info");
-          setModalButtons("ok");
-          setModalTitle("Sucesso!");
-          setModalMessage("Mesa excluída com Sucesso!");
-          setShowModal(true);
-          setExitOnCloseModal(true);
+          OpenModal({
+            title: "Sucesso!",
+            message: "Mesa excluída com Sucesso!",
+            buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+          });
         }
         else {
-          setExitOnCloseModal(false);
           modalError();
         }
       })
       .catch(err => {
-        setExitOnCloseModal(false);
         modalError();
       });
   }
 
   function modalError() {
-    setModalType("error");
-    setModalButtons("close");
-    setModalTitle("Ops!...");
-    setModalMessage("Ocorreu um erro inesperado :(");
-    setShowModal(true);
+    OpenModal({
+      title: "Ops!...",
+      message: "Ocorreu um erro inesperado :(",
+      buttons: [new ModalButton("Fechar", () => HideModal())],
+      styleType: "error",
+    });
   }
 
   function handleList(list: any) {
@@ -305,7 +302,7 @@ export default function EditTableScreen({ navigation, route }: any) {
   return (
     <SafeAreaView style={[styles.container, { height: "100%" }]}>
 
-      <AppModal onClose={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => { onConfirmDelete(); if (exitOnCloseModal) onGoBack() }} onNo={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} />
+      <AppModal visible={modalVisible} />
 
       <View>
         <InputOutline
@@ -442,7 +439,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
   },
-  containerEmpytTable:{
+  containerEmpytTable: {
     alignItems: 'center',
   },
   textEmpytTable: {

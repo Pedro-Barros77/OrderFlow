@@ -15,6 +15,8 @@ import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
 import { ValidateNumber } from "../constants/Extensions";
+import { HideModal, InitModal, OpenModal } from "../services/AppModal.service";
+import { ModalButton } from "../models/ModalButton";
 
 export default function EditProduct({ route, navigation }: any) {
 
@@ -23,12 +25,7 @@ export default function EditProduct({ route, navigation }: any) {
   const txtDescriptionRef = useRef(null);
   const [showCategory, setShowCategory] = useState(false);
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState<"info" | "warning" | "error">("info");
-  const [modalButtons, setModalButtons] = useState<"ok" | "okcancel" | "yesno" | "close">("ok");
-  const [exitOnCloseModal, setExitOnCloseModal] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const [ctxMenuVisible, setCtxMenuVisible] = useState(false);
 
@@ -64,16 +61,20 @@ export default function EditProduct({ route, navigation }: any) {
           setFavorite(product.isFavorite);
         }
         else {
-          setModalType("error");
-          setModalButtons("close");
-          setModalTitle("Produto não encontrado");
-          setModalMessage("O produto que você está tentando editar não foi encontrado na base de dados...");
-          setShowModal(true);
-          setExitOnCloseModal(true);
+          OpenModal({
+            title: "Produto não encontrado",
+            message: "O produto que você está tentando editar não foi encontrado na base de dados...",
+            buttons: [new ModalButton("Fechar", () => { HideModal(); onGoBack() })],
+            styleType: "error"
+          });
         }
       }).catch(err => {
-        setExitOnCloseModal(true);
-        modalError();
+        OpenModal({
+          title: "Ops!...",
+          message: "Ocorreu um erro inesperado :(",
+          buttons: [new ModalButton("Fechar", () => { HideModal(); onGoBack() })],
+          styleType: "error"
+        });
       });
   }
 
@@ -85,6 +86,7 @@ export default function EditProduct({ route, navigation }: any) {
     }
 
     fetchCategories();
+    InitModal(setModalVisible, setModalVisible);
   }, [])
 
   useEffect(() => {
@@ -157,40 +159,41 @@ export default function EditProduct({ route, navigation }: any) {
   }
 
   function modalError() {
-    setModalType("error");
-    setModalButtons("close");
-    setModalTitle("Ops!...");
-    setModalMessage("Ocorreu um erro inesperado :(");
-    setShowModal(true);
+    OpenModal({
+      title: "Ops!...",
+      message: "Ocorreu um erro inesperado :(",
+      buttons: [new ModalButton("Fechar", () => HideModal())],
+      styleType: "error"
+    });
   }
 
   function onDelete() {
-    setModalType("warning");
-    setModalButtons("yesno");
-    setModalTitle("Atenção!");
-    setModalMessage(`Tem certeza que deseja excluir o produto "${title}"?`);
-    setShowModal(true);
-    setExitOnCloseModal(false);
+    OpenModal({
+      title: "Atenção!",
+      message: `Tem certeza que deseja excluir o produto "${title}"?`,
+      buttons: [
+        new ModalButton("Sim", () => { HideModal(); onConfirmDelete() }),
+        new ModalButton("Não", () => HideModal(), undefined, Colors.app.redCancel),
+      ],
+      styleType: "warning",
+    });
   }
 
   function onConfirmDelete() {
     DeleteProduct(productId)
       .then(res => {
         if (res.success) {
-          setModalType("info");
-          setModalButtons("ok");
-          setModalTitle("Sucesso!");
-          setModalMessage("Produto excluído com Sucesso!");
-          setShowModal(true);
-          setExitOnCloseModal(true);
+          OpenModal({
+            title: "Sucesso!",
+            message: "Produto excluído com Sucesso!",
+            buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+          });
         }
         else {
-          setExitOnCloseModal(false);
           modalError();
         }
       })
       .catch(err => {
-        setExitOnCloseModal(false);
         modalError();
       });
   }
@@ -202,21 +205,18 @@ export default function EditProduct({ route, navigation }: any) {
       PostProduct(product)
         .then(res => {
           if (res.success) {
-            setModalType("info");
-            setModalButtons("ok");
-            setModalTitle("Sucesso!");
-            setModalMessage("Produto cadastrado com Sucesso!");
-            setShowModal(true);
+            OpenModal({
+              title: "Sucesso!",
+              message: "Produto cadastrado com Sucesso!",
+              buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+            });
             ClearForms();
-            setExitOnCloseModal(true);
           }
           else {
-            setExitOnCloseModal(false);
             modalError();
           }
         })
         .catch(err => {
-          setExitOnCloseModal(false);
           modalError();
         });
     }
@@ -225,20 +225,17 @@ export default function EditProduct({ route, navigation }: any) {
       PutProduct(product, productId)
         .then(res => {
           if (res.success) {
-            setModalType("info");
-            setModalButtons("ok");
-            setModalTitle("Sucesso!");
-            setModalMessage("Produto atualizado com Sucesso!");
-            setShowModal(true);
-            setExitOnCloseModal(true);
+            OpenModal({
+              title: "Sucesso!",
+              message: "Produto atualizado com Sucesso!",
+              buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+            });
           }
           else {
-            setExitOnCloseModal(false);
             modalError();
           }
         })
         .catch(err => {
-          setExitOnCloseModal(false);
           modalError();
         });
     }
@@ -247,7 +244,7 @@ export default function EditProduct({ route, navigation }: any) {
   return (
     <SafeAreaView>
 
-      <AppModal onClose={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => { onConfirmDelete(); if (exitOnCloseModal) onGoBack() }} onNo={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} />
+      <AppModal visible={modalVisible} />
 
 
       <ScrollView>

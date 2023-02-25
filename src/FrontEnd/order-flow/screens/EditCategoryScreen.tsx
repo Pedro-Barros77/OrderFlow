@@ -11,6 +11,8 @@ import { DeleteCategory, GetCategoryById, PostCategory, PutCategory } from "../s
 import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Menu, MenuItem } from 'react-native-material-menu';
+import { HideModal, InitModal, OpenModal } from "../services/AppModal.service";
+import { ModalButton } from "../models/ModalButton";
 
 
 export default function EditCategory({ route, navigation }: any) {
@@ -24,12 +26,7 @@ export default function EditCategory({ route, navigation }: any) {
   const [showIcon, setShowIcon] = useState(false);
   const [icon, setIcon] = useState(CategoryIcons.question);
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState<"info" | "warning" | "error">("info");
-  const [modalButtons, setModalButtons] = useState<"ok" | "okcancel" | "yesno" | "close">("ok");
-  const [exitOnCloseModal, setExitOnCloseModal] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const colorsEnumValues = Object.values(CategoryColor);
   const themeColors = colorsEnumValues.slice(0, colorsEnumValues.length / 2)
@@ -79,16 +76,20 @@ export default function EditCategory({ route, navigation }: any) {
           setIcon(category.categoryIcon);
         }
         else {
-          setModalType("error");
-          setModalButtons("close");
-          setModalTitle("Categoria não encontrado");
-          setModalMessage("A categoria que você está tentando editar não foi encontrado na base de dados...");
-          setShowModal(true);
-          setExitOnCloseModal(true);
+          OpenModal({
+            title: "Categoria não encontrada",
+            message: "A categoria que você está tentando editar não foi encontrada na base de dados...",
+            buttons: [new ModalButton("Fechar", () => { HideModal(); onGoBack(true) })],
+            styleType: "error"
+          });
         }
       }).catch(err => {
-        setExitOnCloseModal(true);
-        modalError();
+        OpenModal({
+          title: "Ops!...",
+          message: "Ocorreu um erro inesperado :(",
+          buttons: [new ModalButton("Fechar", () => {HideModal(); onGoBack()})],
+          styleType: "error"
+        });
       });
   }
 
@@ -99,6 +100,7 @@ export default function EditCategory({ route, navigation }: any) {
       });
       getCategory(categoryId);
     }
+    InitModal(setModalVisible, setModalVisible);
   }, [])
 
   useEffect(() => {
@@ -163,40 +165,41 @@ export default function EditCategory({ route, navigation }: any) {
   }
 
   function modalError() {
-    setModalType("error");
-    setModalButtons("close");
-    setModalTitle("Ops!...");
-    setModalMessage("Ocorreu um erro inesperado :(");
-    setShowModal(true);
+    OpenModal({
+      title: "Ops!...",
+      message: "Ocorreu um erro inesperado :(",
+      buttons: [new ModalButton("Fechar", () => HideModal())],
+      styleType: "error"
+    });
   }
 
   function onDelete() {
-    setModalType("warning");
-    setModalButtons("yesno");
-    setModalTitle("Atenção!");
-    setModalMessage(`Tem certeza que deseja excluir a categoria "${title}"?`);
-    setShowModal(true);
-    setExitOnCloseModal(false);
+    OpenModal({
+      title: "Atenção!",
+      message: `Tem certeza que deseja excluir a categoria "${title}"?`,
+      buttons: [
+        new ModalButton("Sim", () => { HideModal(); onConfirmDelete() }),
+        new ModalButton("Não", () => HideModal(), undefined, Colors.app.redCancel),
+      ],
+      styleType: "warning",
+    });
   }
 
   function onConfirmDelete() {
     DeleteCategory(categoryId)
       .then(res => {
         if (res.success) {
-          setModalType("info");
-          setModalButtons("ok");
-          setModalTitle("Sucesso!");
-          setModalMessage("Categoria excluída com Sucesso!");
-          setShowModal(true);
-          setExitOnCloseModal(true);
+          OpenModal({
+            title: "Sucesso!",
+            message: "Categoria excluída com Sucesso!",
+            buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+          });
         }
         else {
-          setExitOnCloseModal(false);
           modalError();
         }
       })
       .catch(err => {
-        setExitOnCloseModal(false);
         modalError();
       });
   }
@@ -208,21 +211,18 @@ export default function EditCategory({ route, navigation }: any) {
       PostCategory(category)
         .then(res => {
           if (res.success) {
-            setModalType("info");
-            setModalButtons("ok");
-            setModalTitle("Sucesso!");
-            setModalMessage("Categoria cadastrada com Sucesso!");
-            setShowModal(true);
+            OpenModal({
+              title: "Sucesso!",
+              message: "Categoria cadastrada com Sucesso!",
+              buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+            });
             ClearForms();
-            setExitOnCloseModal(true);
           }
           else {
-            setExitOnCloseModal(false);
             modalError();
           }
         })
         .catch(err => {
-          setExitOnCloseModal(false);
           modalError();
         });
     }
@@ -231,20 +231,17 @@ export default function EditCategory({ route, navigation }: any) {
       PutCategory(category, categoryId)
         .then(res => {
           if (res.success) {
-            setModalType("info");
-            setModalButtons("ok");
-            setModalTitle("Sucesso!");
-            setModalMessage("Categoria atualizada com Sucesso!");
-            setShowModal(true);
-            setExitOnCloseModal(true);
+            OpenModal({
+              title: "Sucesso!",
+              message: "Categoria atualizada com Sucesso!",
+              buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+            });
           }
           else {
-            setExitOnCloseModal(false);
             modalError();
           }
         })
         .catch(err => {
-          setExitOnCloseModal(false);
           modalError();
         });
     }
@@ -253,7 +250,7 @@ export default function EditCategory({ route, navigation }: any) {
   return (
     <SafeAreaView>
 
-      <AppModal onClose={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => { onConfirmDelete(); if (exitOnCloseModal) onGoBack() }} onNo={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} />
+      <AppModal visible={modalVisible} />
 
 
       <ScrollView>

@@ -3,25 +3,20 @@ import { StyleSheet, Text, View, TouchableOpacity, Modal } from "react-native";
 import { Colors, GetCategoryColor } from "../constants/Colors";
 import { CategoryColor, CategoryIcons } from "../constants/Enums";
 import { CategoryIcon } from "../constants/Icons";
+import { modalProps } from "../services/AppModal.service";
 
 const AppModal = (props: {
   visible: boolean,
-  onClose: (() => void),
-  title: string,
-  message: string,
-  buttons?: "ok" | "okcancel" | "yesno" | "close",
-  modalType?: "info" | "warning" | "error",
-  onCanel?: (() => void),
-  onYes?: (() => void),
-  onNo?: (() => void),
   showCloseBtn?: boolean,
 }) => {
 
+  const onHide = () => modalProps.onHide(false);
+
   let titleColor = Colors.app.tint;
-  if(props.modalType == "warning"){
+  if (modalProps.styleType == "warning") {
     titleColor = Colors.app.catTheme_yellow
   }
-  else if(props.modalType == "error"){
+  else if (modalProps.styleType == "error") {
     titleColor = Colors.app.redCancel
   }
 
@@ -34,56 +29,31 @@ const AppModal = (props: {
       animationType={"fade"}
       transparent={true}
       visible={props.visible}
-      onRequestClose={props.onClose}>
+      onRequestClose={onHide}>
       <View style={styles.modalBackDrop}>
         <View style={styles.modalView}>
 
           {props.showCloseBtn == true || props.showCloseBtn == undefined ?
-            <TouchableOpacity onPress={props.onClose} activeOpacity={0.5} style={styles.btnClose}>
-              <MaterialCommunityIcons name="close" size={30} color="black" />
+            <TouchableOpacity onPress={onHide} activeOpacity={0.5} style={styles.btnClose}>
+              <MaterialCommunityIcons name="close" size={30} color={Colors.app.black} />
             </TouchableOpacity>
             : null}
 
           <View style={styles.modalContent}>
-            <Text style={[styles.title, {color:titleColor}]}>{props.title}</Text>
-            <Text style={styles.message}>{props.message}</Text>
+            <Text style={[styles.title, { color: titleColor }]}>{modalProps.title}</Text>
+            <Text style={styles.message}>{modalProps.message}</Text>
           </View>
 
           <View style={styles.buttonsContainer}>
-
-            {props.buttons == "okcancel" ?
-              <TouchableOpacity activeOpacity={0.7} style={[styles.btn, styles.btnCancel]} onPress={props.onCanel}>
-                <Text style={styles.btnText}>Cancelar</Text>
-              </TouchableOpacity>
-              : null}
-
-
-            {props.buttons == "ok" || props.buttons == "okcancel" || props.buttons == undefined ?
-              <TouchableOpacity activeOpacity={0.7} style={[styles.btn, styles.btnOk]} onPress={props.onClose}>
-                <Text style={styles.btnText}>Ok</Text>
-              </TouchableOpacity>
-              : null}
-
-            {props.buttons == "yesno" ?
-              <TouchableOpacity activeOpacity={0.7} style={[styles.btn, styles.btnNo]} onPress={props.onNo}>
-                <Text style={styles.btnText}>Não</Text>
-              </TouchableOpacity>
-              : null}
-
-            {props.buttons == "yesno" ?
-              <TouchableOpacity activeOpacity={0.7} style={[styles.btn, styles.btnYes]} onPress={props.onYes}>
-                <Text style={styles.btnText}>Sim</Text>
-              </TouchableOpacity>
-              : null}
-
-            {props.buttons == "close" ?
-              <TouchableOpacity activeOpacity={0.7} style={[styles.btn, styles.btnCancel]} onPress={props.onClose}>
-                <Text style={styles.btnText}>Fechar</Text>
-              </TouchableOpacity>
-              : null}
-
+            {
+              modalProps.buttons.map(b =>
+              (
+                <TouchableOpacity key={b.text} activeOpacity={0.7} style={[styles.btn, {backgroundColor: b.backgroundColor}]} onPress={() => b.onPress ? b.onPress(b.data) : null}>
+                  <Text style={[styles.btnText, {color: b.textColor}]}>{b.text}</Text>
+                </TouchableOpacity>
+              ))
+            }
           </View>
-
         </View>
       </View>
     </Modal>
@@ -153,22 +123,7 @@ const styles = StyleSheet.create({
     width: "45%",
     height: 50,
     borderRadius: 10,
-  },
-
-  btnOk: {
     backgroundColor: Colors.app.tint,
-  },
-
-  btnCancel: {
-    backgroundColor: Colors.app.redCancel,
-  },
-
-  btnNo: {
-    backgroundColor: Colors.app.redCancel,
-  },
-
-  btnYes: {
-    backgroundColor: Colors.app.tintGreen,
   },
 
   btnText: {
