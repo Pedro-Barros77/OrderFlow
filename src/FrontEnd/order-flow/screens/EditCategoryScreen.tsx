@@ -1,19 +1,16 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Dimensions, ActivityIndicator, Modal, DeviceEventEmitter } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, DeviceEventEmitter } from "react-native";
+import React, { useEffect, useState } from "react";
 import { MD3LightTheme } from "react-native-paper";
 import { InputOutline } from "react-native-input-outline";
 import { Colors, GetCategoryColor } from "../constants/Colors";
 import DropDown from "react-native-paper-dropdown";
 import { Category } from "../models/Category";
 import { CategoryColor, CategoryDisplay, CategoryIcons, IconDisplay } from "../constants/Enums";
-import ToggleSwitch from 'toggle-switch-react-native'
 import { CategoryIcon } from "../constants/Icons";
-import { DeleteProduct, GetProductById, PostProduct, PutProduct } from "../services/Products.service";
-import { DeleteCategory, GetAllCategories, GetCategoryById, PostCategory, PutCategory } from "../services/Categories.service";
-import { Product } from "../models/Product";
+import { DeleteCategory, GetCategoryById, PostCategory, PutCategory } from "../services/Categories.service";
 import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
+import { Menu, MenuItem } from 'react-native-material-menu';
 
 
 export default function EditCategory({ route, navigation }: any) {
@@ -35,19 +32,39 @@ export default function EditCategory({ route, navigation }: any) {
   const [exitOnCloseModal, setExitOnCloseModal] = useState(false);
 
   const colorsEnumValues = Object.values(CategoryColor);
-  const themeColors = colorsEnumValues.slice(0, colorsEnumValues.length/2)
-  const themeValues = colorsEnumValues.slice(colorsEnumValues.length/2)
+  const themeColors = colorsEnumValues.slice(0, colorsEnumValues.length / 2)
+  const themeValues = colorsEnumValues.slice(colorsEnumValues.length / 2)
 
-  const colorsMap = themeColors.map(function(item, i) {
-    return {label: (CategoryDisplay as any)[item.toString()], value: themeValues[i]};
+  const colorsMap = themeColors.map(function (item, i) {
+    const lbl: string = (CategoryDisplay as any)[item.toString()];
+    return {
+      label: lbl,
+      value: themeValues[i],
+      custom: (
+        <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+          <MaterialCommunityIcons name="checkbox-blank-circle" size={24} color={GetCategoryColor(CategoryColor[item as any] as any)} />
+          <Text style={{ marginLeft: 10 }}>{lbl}</Text>
+        </View>
+      )
+    };
   });
 
   const iconsEnumValues = Object.values(CategoryIcons);
-  const icons = iconsEnumValues.slice(0, iconsEnumValues.length/2)
-  const iconsValues = iconsEnumValues.slice(iconsEnumValues.length/2)
+  const icons = iconsEnumValues.slice(0, iconsEnumValues.length / 2)
+  const iconsValues = iconsEnumValues.slice(iconsEnumValues.length / 2)
 
-  const iconsMap = icons.map(function(item, i) {
-    return {label: (IconDisplay as any)[item.toString()], value: iconsValues[i]};
+  const iconsMap = icons.map(function (item, i) {
+    const lbl: string = (IconDisplay as any)[item.toString()];
+    return {
+      label: lbl,
+      value: iconsValues[i],
+      custom: (
+        <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+          <CategoryIcon catIcon={iconsValues[i]} size={24} color={GetCategoryColor(colorTheme, true)} />
+          <Text style={{ marginLeft: 10 }}>{lbl}</Text>
+        </View>
+      )
+    };
   });
 
 
@@ -287,6 +304,8 @@ export default function EditCategory({ route, navigation }: any) {
                 value={icon}
                 setValue={onSelectIcon}
                 list={iconsMap}
+
+
                 activeColor={Colors.app.tintGreen}
                 dropDownStyle={styles.dropDownBox}
                 dropDownItemStyle={{ backgroundColor: Colors.app.white }}
