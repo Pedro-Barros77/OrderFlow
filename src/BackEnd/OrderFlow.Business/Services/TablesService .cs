@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace OrderFlow.Business.Services
 {
@@ -28,15 +29,18 @@ namespace OrderFlow.Business.Services
         {
             if (!IsValid(value)) return value;
             return await _repository.Add(value);
+
         }
 
 
-        private bool IsValid(Table value)
+        private bool IsValid(Table table)
         {
-            Regex regex = new Regex(@"^[\w\s\-à-úÀ-Ú]+$");
-            if (value.Name.Length > 50) { AddError("ERRO(Nome deve ser menor que 50 caracteres) "); }
-            if (!regex.IsMatch(value.Name)) { AddError("ERRO(Não é possível adicionar caracteres especiais ao Titulo) "); }
-            if (value.PaidValue < 0) { AddError("ERRO(Preço não pode ser valor negativo) "); }
+            Regex regex = new Regex(@"^[\w\s\-à-úÀ-Ú]*$");
+            if (table.Name.Length > 50) { AddError("ERRO(Nome deve ser menor que 50 caracteres) "); }
+            if (!regex.IsMatch(table.Name)) { AddError("ERRO(Não é possível adicionar caracteres especiais ao Titulo) "); }
+            if (table.PaidValue < 0) { AddError("ERRO(Preço não pode ser valor negativo) "); }
+            if (table.Items.Any(item => (item.Product.Price * item.Count) + item.Additional - item.Discount < 0))
+                AddError("ERRO(Não é permitido salvar um item com valor total menor que zero!) ");
             return !HasError();
         }
 
