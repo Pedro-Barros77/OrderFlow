@@ -32,7 +32,7 @@ export default function EditTableScreen({ navigation, route }: any) {
 
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [goBackSubscription, setGoBackSubscription] = useState<{unsubscribe: () => void}>({unsubscribe:() => { }})
+  const [goBackSubscription, setGoBackSubscription] = useState<{ unsubscribe: () => void }>({ unsubscribe: () => { } })
 
   React.useEffect(() => {
     if (isEdit) {
@@ -61,7 +61,7 @@ export default function EditTableScreen({ navigation, route }: any) {
       }
     });
 
-    setGoBackSubscription({unsubscribe:_unsub});
+    setGoBackSubscription({ unsubscribe: _unsub });
   }, [hasChanges])
 
   React.useEffect(() => {
@@ -102,10 +102,17 @@ export default function EditTableScreen({ navigation, route }: any) {
             <View style={{ width: 7 }} ></View>
             <Text>Excluir</Text>
           </MenuItem>
+
           <MenuItem onPress={() => ClearForms()}>
-            <MaterialCommunityIcons name="broom" size={18} color={Colors.app.tintGreen} />
+            <MaterialCommunityIcons name="broom" size={18} color={Colors.app.orange} />
             <View style={{ width: 7 }}></View>
             <Text>Limpar Itens</Text>
+          </MenuItem>
+
+          <MenuItem onPress={() => onCloseOrder()}>
+            <MaterialCommunityIcons name="notebook-check-outline" size={18} color={Colors.app.tintGreen} />
+            <View style={{ width: 7 }} ></View>
+            <Text>Fechar Mesa</Text>
           </MenuItem>
         </Menu>
       </View>
@@ -193,7 +200,22 @@ export default function EditTableScreen({ navigation, route }: any) {
   }
 
   function onCloseOrder() {
-
+    
+    items.forEach(item => {
+      let _sum = (item.product!.price * item.count) + Number(item.additional) - Number(item.discount)
+      if (_sum < 0) {
+        OpenModal({
+          title: "Aviso!",
+          message: `O valor do produto ${item.product?.title} não pode ser negativo`,
+          buttons: [new ModalButton("Ok", () => HideModal())],
+          styleType: 'warning'
+        });
+        return;
+      }
+      item.paid = true
+    });
+    setItems(items)
+    
   }
 
   function onSave() {
