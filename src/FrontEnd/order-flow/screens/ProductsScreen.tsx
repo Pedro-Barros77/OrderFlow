@@ -1,5 +1,5 @@
-import { SafeAreaView, StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, DeviceEventEmitter, Alert } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { SafeAreaView, StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, DeviceEventEmitter } from "react-native";
+import React, { useRef, useState } from "react";
 import TextInputBtn from "../components/TextInputBtn";
 import HorizontalDivider from "../components/HorizontalDivider";
 import CategoryCard from "../components/CategoryCard";
@@ -8,16 +8,14 @@ import ShowMore from "../components/ShowMore";
 import ProductCard from "../components/ProductCard";
 import { Category } from "../models/Category";
 import { Product } from "../models/Product";
-import { RootStackScreenProps, RootTabScreenProps } from "../types";
 import { GetAllProducts } from "../services/Products.service";
 import { GetAllCategories } from "../services/Categories.service";
 import { Colors } from "../constants/Colors";
 import ToggleSwitch from "toggle-switch-react-native";
 import { Added, FillOdd } from "../constants/Extensions";
 import MaterialCommunityIcons from "@expo/vector-icons/build/MaterialCommunityIcons";
-import { InitModal, OpenModal } from "../services/AppModal.service";
+import { InitModal } from "../services/AppModal.service";
 import AppModal from "../components/AppModal";
-import { ModalButton } from "../models/ModalButton";
 
 export default function Products({ route, navigation }: any) {
 
@@ -59,10 +57,15 @@ export default function Products({ route, navigation }: any) {
   React.useEffect(() => {
     onRefreshCategories();
     onRefreshProducts(showFavoritesOnly);
-    DeviceEventEmitter.addListener('updateProducts', (e) => fetchProducts());
-    DeviceEventEmitter.addListener('updateCategories', (e) => fetchCategories());
+    const updateProductsListener = DeviceEventEmitter.addListener('updateProducts', (e) => fetchProducts());
+    const updateCategoriesListener = DeviceEventEmitter.addListener('updateCategories', (e) => fetchCategories());
 
     InitModal(setModalVisible, setModalVisible);
+
+    return () =>{
+      updateProductsListener.remove();
+      updateCategoriesListener.remove();
+    }
   }, [])
 
   React.useEffect(() => {
@@ -124,6 +127,10 @@ export default function Products({ route, navigation }: any) {
   }
 
   function onAddToTable(productId: number) {
+    if(isSelect == undefined || !isSelect){
+      navigation.navigate("Tables", { productId: productId });
+      return
+    }
     navigation.navigate("EditTableScreen", { tableId: tableId, index: index, productId: productId });
   }
 

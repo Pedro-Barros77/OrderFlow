@@ -49,7 +49,7 @@ export default function EditTableScreen({ navigation, route }: any) {
           title: "Atenção!",
           message: "Existem modifições nos produtos que não foram salvas. Deseja descartar?",
           buttons: [
-            new ModalButton("Sim", () => {
+            new ModalButton("Descartar", () => {
               HideModal();
 
               _unsub();
@@ -66,7 +66,7 @@ export default function EditTableScreen({ navigation, route }: any) {
 
   React.useEffect(() => {
     onProductSelected();
-  }, [productId])
+  }, [productId]);
 
   React.useEffect(() => {
     if (isEdit) {
