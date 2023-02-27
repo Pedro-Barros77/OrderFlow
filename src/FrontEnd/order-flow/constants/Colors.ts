@@ -24,6 +24,7 @@ const Colors = {
     yellowStar:'rgb(254, 226, 65)',
     redCancel:'rgb(194, 82, 70)',
     defaultBackgroundGray:'rgb(242, 242, 242)',
+    orange: 'rgb(252, 132, 3)',
 
 
     trasparent7White:'rgba(255,255,255,0.7)',
