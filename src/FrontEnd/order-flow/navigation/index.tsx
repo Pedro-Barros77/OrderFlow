@@ -113,7 +113,6 @@ function BottomTabNavigator() {
         options={({ navigation }: RootTabScreenProps<"Tables">) => ({
           title: "Mesas",
           tabBarIcon: ({ color }) => TabBarIcon({ name: "home", color: color }),
-          headerTitle: (props) => TableHeader(props)
         })}
       />
       <BottomTab.Screen
@@ -180,44 +179,3 @@ function ProductsHeader(props: any) {
   );
 
 }
-
-function TableHeader(props: any) {
-  const styles = StyleSheet.create({
-    container: {
-      width: "100%",
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between"
-    },
-    title: {
-      fontSize: 18,
-      fontWeight: "500",
-    },
-    addButton: {
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    text: {
-      marginRight: 5,
-      fontSize: 15,
-      color: Colors.app.tintGreen
-    },
-  });
-
-  const onCreateTable = () => {
-    navigate('EditTableScreen', { tableId: 0, index: 0 });
-  }
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Mesas</Text>
-      <TouchableOpacity onPress={onCreateTable} style={styles.addButton}>
-        <Text style={styles.text} >Add Mesa</Text>
-        <MaterialCommunityIcons name="plus-circle" size={35} color={Colors.app.tintGreen} />
-      </TouchableOpacity>
-    </View>
-  );
-}
-

@@ -29,8 +29,8 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 >;
 
 export type RootTabParamList = {
-  Tables: undefined;
-  Products: {isSelect: boolean};
+  Tables: {productId: number | undefined};
+  Products: {isSelect: boolean} | undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<

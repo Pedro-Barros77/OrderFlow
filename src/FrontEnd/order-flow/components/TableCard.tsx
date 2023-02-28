@@ -2,22 +2,27 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { FormatCurrency, PadNumber } from '../constants/Extensions';
+import { Table } from '../models/Table';
 
 const TableCard = (props: {
-  id: any,
-  name: string,
-  total: number,
-  status: string,
+  index:number,
+  table: Table,
   onPress: any,
   hidden: boolean,
 }) => {
+
+  function getTotal(): number {
+    if((props.table?.items?.length ?? 0) == 0) return 0;
+    return props.table.items.map(item => item.paid ? 0 : (item.product!.price * item.count) + item.additional - item.discount)
+      .reduce((a, b) => a + b) ?? 0;
+  }
 
 
   return props.hidden? <View style={{width:'31%'}}></View>:(
     <View 
     style={styles.container} 
     >
-      <TouchableOpacity
+      <TouchableOpacity activeOpacity={0.7}
         onPress={props.onPress}
         style={styles.buttonStyle}
         
@@ -27,12 +32,12 @@ const TableCard = (props: {
           style={styles.buttonImageStyle}
           resizeMode='contain'
         >
-          <View style={[styles.indexContainer,{backgroundColor: props.status === 'available' ? Colors.app.trasparent3Green : Colors.app.trasparent7White}]}>
-            <Text style={styles.index}>{PadNumber(props.id, 2)}</Text>
+          <View style={[styles.indexContainer,{backgroundColor: props.table.items.length == 0 && props.table.name.length == 0? Colors.app.trasparent3Green : Colors.app.trasparent7White}]}>
+            <Text style={styles.index}>{PadNumber(props.index, 2)}</Text>
           </View>
           <View style={styles.labelsContainer}>
-            <Text style={styles.name}>{props.name}</Text>
-            <Text style={styles.total}>{FormatCurrency(props.total ?? 0)}</Text>
+            <Text style={styles.name}>{props.table.name}</Text>
+            <Text style={styles.total}>{FormatCurrency(getTotal())}</Text>
           </View>
         </ImageBackground>
       </TouchableOpacity>

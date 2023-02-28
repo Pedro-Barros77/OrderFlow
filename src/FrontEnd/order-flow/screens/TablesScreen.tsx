@@ -1,24 +1,45 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, RefreshControl, ActivityIndicator, DeviceEventEmitter, } from 'react-native';
+import { StyleSheet, View, FlatList, RefreshControl, ActivityIndicator, DeviceEventEmitter, TouchableOpacity, Text } from 'react-native';
 
 import { RootTabScreenProps } from '../types';
 
 import React, { useState } from 'react';
 import TableCard from '../components/TableCard';
-import { Ionicons } from '@expo/vector-icons';
 import { FillOdd } from '../constants/Extensions';
 import { GetAllTables } from '../services/Tables.service';
 import { Table } from '../models/Table';
 import { Colors } from '../constants/Colors';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'>) {
+export default function TablesScreen({ route, navigation }: RootTabScreenProps<'Tables'>) {
   const [tables, setTables] = useState<Array<Table>>([]);
   const [refreshingTables, setRefreshingTables] = useState(false);
 
+  const { productId } = route.params ?? {};
+
+  const getHeader = () => <TablesHeader onCreateTable={() => navigation.navigate('EditTableScreen', { tableId: 0, index: 0, productId: 0 })} />
+  const clearRouteParams = () => navigation.setParams({ productId: undefined });
+
   React.useEffect(() => {
     fetchTables();
-    
-    DeviceEventEmitter.addListener('updatedTables', (e)=>fetchTables())
+
+    const unsubscribeUpdateTables = DeviceEventEmitter.addListener('updatedTables', (e) => fetchTables())
+
+    const unsubscribeBlur = navigation.addListener('blur', (e: any) => {
+      clearRouteParams();
+    });
+    navigation.setOptions({
+      headerTitle: getHeader 
+    });
+
+    return () => {
+      unsubscribeBlur();
+      unsubscribeUpdateTables.remove();
+    }
   }, [])
+
+  React.useEffect(() => {
+    onAddingProduct();
+  }, [productId]);
 
   async function fetchTables() {
     return GetAllTables()
@@ -36,36 +57,62 @@ export default function TablesScreen({ navigation }: RootTabScreenProps<'Tables'
   }, []);
 
   const handleTablePress = (table: Table, i: number) => {
-    navigation.navigate('EditTableScreen', { tableId: table.id, index:i, productId: 0})
+    navigation.navigate('EditTableScreen', { tableId: table.id, index: i, productId: productId ?? 0 })
   }
+
+  function cancelAddProduct(){
+    navigation.setOptions({
+      headerTitle: getHeader,
+      tabBarStyle: undefined
+    });
+
+    clearRouteParams();
+  }
+
+  function onAddingProduct() {
+    if (productId == undefined || productId <= 0){
+      cancelAddProduct();
+      return
+    }
+
+    navigation.setOptions({
+      headerTitle: "Selecione a mesa para adicionar:",
+      tabBarStyle: { display: 'none' }
+    });
+  }
+
+  
 
   return (
     <View style={styles.container}>
       <View style={styles.tableList}>
         {tables.length > 0 ?
-        <FlatList
-          columnWrapperStyle={styles.tableContainer}
-          data={FillOdd(tables, 3)}
-          keyExtractor={(item: any) => item.id.toString()}
-          numColumns={3}
-          refreshControl={
-            <RefreshControl refreshing={refreshingTables} onRefresh={onRefreshTables} />
-          }
-          renderItem={({ item, index }) =>
-            <TableCard
-              id={index + 1}
-              name={item.name}
-              total={item.total}
-              status={item.status}
-              onPress={() => handleTablePress(item, index)}
-              hidden={item.id == 0}
+          <FlatList
+            columnWrapperStyle={styles.tableContainer}
+            data={FillOdd(tables, 3)}
+            keyExtractor={(item: any) => item.id.toString()}
+            numColumns={3}
+            refreshControl={
+              <RefreshControl refreshing={refreshingTables} onRefresh={onRefreshTables} />
+            }
+            renderItem={({ item, index }) =>
+              <TableCard
+                table={item}
+                index={index + 1}
+                onPress={() => handleTablePress(item, index)}
+                hidden={item.id == 0}
 
-            />}
-            
-        />: <ActivityIndicator size="large" color={Colors.app.tint} />}
+              />}
+
+          /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
       </View>
+      {productId != undefined && productId > 0 ?
+      <View style={styles.rowCancelAddItem}>
+        <TouchableOpacity activeOpacity={0.7} style={styles.btnCancelAddItem} onPress={cancelAddProduct}>
+          <Text style={styles.txtCancelAddItem}>Cancelar</Text>
+        </TouchableOpacity>
+      </View> : null}
 
-      
     </View >
 
 
@@ -112,4 +159,66 @@ const styles = StyleSheet.create({
 
   },
 
+  rowCancelAddItem:{
+    display:"flex",
+    flexDirection:"row",
+    width:"100%",
+    justifyContent:"flex-end"
+  },
+
+  btnCancelAddItem: {
+    backgroundColor: Colors.app.redCancel,
+    width: "30%",
+    height: 45,
+    borderRadius: 7,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 10,
+    marginHorizontal:20,
+  },
+
+  txtCancelAddItem: {
+    color: Colors.app.white,
+    fontWeight: "bold",
+    fontSize: 15,
+  },
+
 });
+
+
+function TablesHeader(props: {onCreateTable: () => void}) {
+  const styles = StyleSheet.create({
+    container: {
+      width: "100%",
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between"
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: "500",
+    },
+    addButton: {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    text: {
+      marginRight: 5,
+      fontSize: 15,
+      color: Colors.app.tintGreen
+    },
+  });
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{"Mesas"}</Text>
+      <TouchableOpacity onPress={props.onCreateTable} style={styles.addButton}>
+        <Text style={styles.text} >Add Mesa</Text>
+        <MaterialCommunityIcons name="plus-circle" size={35} color={Colors.app.tintGreen} />
+      </TouchableOpacity>
+    </View>
+  );
+}

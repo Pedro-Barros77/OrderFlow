@@ -52,6 +52,7 @@ function PostTable(table: Table): Promise<any> {
 }
 
 function PutTable(table: Table, tableId: number): Promise<any> {
+  console.log(JSON.stringify(table));
   const result = fetch(`${API_BaseUrl}/tables?tableId=${tableId}`, {
     method: "PUT",
     headers: {
@@ -60,7 +61,10 @@ function PutTable(table: Table, tableId: number): Promise<any> {
     },
     body: JSON.stringify(table),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      // console.log(JSON.stringify(response));
+      return response.json();
+    })
     .then((json) => {
       return json;
     })

@@ -1,19 +1,18 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Dimensions, ActivityIndicator, Modal, DeviceEventEmitter } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, DeviceEventEmitter } from "react-native";
+import React, { useEffect, useState } from "react";
 import { MD3LightTheme } from "react-native-paper";
 import { InputOutline } from "react-native-input-outline";
 import { Colors, GetCategoryColor } from "../constants/Colors";
 import DropDown from "react-native-paper-dropdown";
 import { Category } from "../models/Category";
 import { CategoryColor, CategoryDisplay, CategoryIcons, IconDisplay } from "../constants/Enums";
-import ToggleSwitch from 'toggle-switch-react-native'
 import { CategoryIcon } from "../constants/Icons";
-import { DeleteProduct, GetProductById, PostProduct, PutProduct } from "../services/Products.service";
-import { DeleteCategory, GetAllCategories, GetCategoryById, PostCategory, PutCategory } from "../services/Categories.service";
-import { Product } from "../models/Product";
+import { DeleteCategory, GetCategoryById, PostCategory, PutCategory } from "../services/Categories.service";
 import AppModal from "../components/AppModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
+import { Menu, MenuItem } from 'react-native-material-menu';
+import { HideModal, InitModal, OpenModal } from "../services/AppModal.service";
+import { ModalButton } from "../models/ModalButton";
 
 
 export default function EditCategory({ route, navigation }: any) {
@@ -27,27 +26,42 @@ export default function EditCategory({ route, navigation }: any) {
   const [showIcon, setShowIcon] = useState(false);
   const [icon, setIcon] = useState(CategoryIcons.question);
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState<"info" | "warning" | "error">("info");
-  const [modalButtons, setModalButtons] = useState<"ok" | "okcancel" | "yesno" | "close">("ok");
-  const [exitOnCloseModal, setExitOnCloseModal] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const colorsEnumValues = Object.values(CategoryColor);
-  const themeColors = colorsEnumValues.slice(0, colorsEnumValues.length/2)
-  const themeValues = colorsEnumValues.slice(colorsEnumValues.length/2)
+  const themeColors = colorsEnumValues.slice(0, colorsEnumValues.length / 2)
+  const themeValues = colorsEnumValues.slice(colorsEnumValues.length / 2)
 
-  const colorsMap = themeColors.map(function(item, i) {
-    return {label: (CategoryDisplay as any)[item.toString()], value: themeValues[i]};
+  const colorsMap = themeColors.map(function (item, i) {
+    const lbl: string = (CategoryDisplay as any)[item.toString()];
+    return {
+      label: lbl,
+      value: themeValues[i],
+      custom: (
+        <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+          <MaterialCommunityIcons name="checkbox-blank-circle" size={24} color={GetCategoryColor(CategoryColor[item as any] as any)} />
+          <Text style={{ marginLeft: 10 }}>{lbl}</Text>
+        </View>
+      )
+    };
   });
 
   const iconsEnumValues = Object.values(CategoryIcons);
-  const icons = iconsEnumValues.slice(0, iconsEnumValues.length/2)
-  const iconsValues = iconsEnumValues.slice(iconsEnumValues.length/2)
+  const icons = iconsEnumValues.slice(0, iconsEnumValues.length / 2)
+  const iconsValues = iconsEnumValues.slice(iconsEnumValues.length / 2)
 
-  const iconsMap = icons.map(function(item, i) {
-    return {label: (IconDisplay as any)[item.toString()], value: iconsValues[i]};
+  const iconsMap = icons.map(function (item, i) {
+    const lbl: string = (IconDisplay as any)[item.toString()];
+    return {
+      label: lbl,
+      value: iconsValues[i],
+      custom: (
+        <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+          <CategoryIcon catIcon={iconsValues[i]} size={24} color={GetCategoryColor(colorTheme, true)} />
+          <Text style={{ marginLeft: 10 }}>{lbl}</Text>
+        </View>
+      )
+    };
   });
 
 
@@ -62,16 +76,20 @@ export default function EditCategory({ route, navigation }: any) {
           setIcon(category.categoryIcon);
         }
         else {
-          setModalType("error");
-          setModalButtons("close");
-          setModalTitle("Categoria não encontrado");
-          setModalMessage("A categoria que você está tentando editar não foi encontrado na base de dados...");
-          setShowModal(true);
-          setExitOnCloseModal(true);
+          OpenModal({
+            title: "Categoria não encontrada",
+            message: "A categoria que você está tentando editar não foi encontrada na base de dados...",
+            buttons: [new ModalButton("Fechar", () => { HideModal(); onGoBack(true) })],
+            styleType: "error"
+          });
         }
       }).catch(err => {
-        setExitOnCloseModal(true);
-        modalError();
+        OpenModal({
+          title: "Ops!...",
+          message: "Ocorreu um erro inesperado :(",
+          buttons: [new ModalButton("Fechar", () => { HideModal(); onGoBack() })],
+          styleType: "error"
+        });
       });
   }
 
@@ -82,6 +100,7 @@ export default function EditCategory({ route, navigation }: any) {
       });
       getCategory(categoryId);
     }
+    InitModal(setModalVisible, setModalVisible);
   }, [])
 
   useEffect(() => {
@@ -145,41 +164,42 @@ export default function EditCategory({ route, navigation }: any) {
     navigation.goBack();
   }
 
-  function modalError() {
-    setModalType("error");
-    setModalButtons("close");
-    setModalTitle("Ops!...");
-    setModalMessage("Ocorreu um erro inesperado :(");
-    setShowModal(true);
+  function modalError(message?: string) {
+    OpenModal({
+      title: "Ops!...",
+      message: message ?? "Ocorreu um erro inesperado :(",
+      buttons: [new ModalButton("Fechar", () => HideModal())],
+      styleType: "error"
+    });
   }
 
   function onDelete() {
-    setModalType("warning");
-    setModalButtons("yesno");
-    setModalTitle("Atenção!");
-    setModalMessage(`Tem certeza que deseja excluir a categoria "${title}"?`);
-    setShowModal(true);
-    setExitOnCloseModal(false);
+    OpenModal({
+      title: "Atenção!",
+      message: `Tem certeza que deseja excluir a categoria "${title}"?`,
+      buttons: [
+        new ModalButton("Sim", () => { HideModal(); onConfirmDelete() }),
+        new ModalButton("Não", () => HideModal(), undefined, Colors.app.redCancel),
+      ],
+      styleType: "warning",
+    });
   }
 
   function onConfirmDelete() {
     DeleteCategory(categoryId)
       .then(res => {
         if (res.success) {
-          setModalType("info");
-          setModalButtons("ok");
-          setModalTitle("Sucesso!");
-          setModalMessage("Categoria excluída com Sucesso!");
-          setShowModal(true);
-          setExitOnCloseModal(true);
+          OpenModal({
+            title: "Sucesso!",
+            message: "Categoria excluída com Sucesso!",
+            buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+          });
         }
         else {
-          setExitOnCloseModal(false);
-          modalError();
+          modalError(res.errors[0]);
         }
       })
       .catch(err => {
-        setExitOnCloseModal(false);
         modalError();
       });
   }
@@ -191,21 +211,18 @@ export default function EditCategory({ route, navigation }: any) {
       PostCategory(category)
         .then(res => {
           if (res.success) {
-            setModalType("info");
-            setModalButtons("ok");
-            setModalTitle("Sucesso!");
-            setModalMessage("Categoria cadastrada com Sucesso!");
-            setShowModal(true);
+            OpenModal({
+              title: "Sucesso!",
+              message: "Categoria cadastrada com Sucesso!",
+              buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+            });
             ClearForms();
-            setExitOnCloseModal(true);
           }
           else {
-            setExitOnCloseModal(false);
-            modalError();
+            modalError(res.errors[0]);
           }
         })
         .catch(err => {
-          setExitOnCloseModal(false);
           modalError();
         });
     }
@@ -214,20 +231,17 @@ export default function EditCategory({ route, navigation }: any) {
       PutCategory(category, categoryId)
         .then(res => {
           if (res.success) {
-            setModalType("info");
-            setModalButtons("ok");
-            setModalTitle("Sucesso!");
-            setModalMessage("Categoria atualizada com Sucesso!");
-            setShowModal(true);
-            setExitOnCloseModal(true);
+            OpenModal({
+              title: "Sucesso!",
+              message: "Categoria atualizada com Sucesso!",
+              buttons: [new ModalButton("Ok", () => { HideModal(); onGoBack(true) })],
+            });
           }
           else {
-            setExitOnCloseModal(false);
             modalError();
           }
         })
         .catch(err => {
-          setExitOnCloseModal(false);
           modalError();
         });
     }
@@ -236,7 +250,7 @@ export default function EditCategory({ route, navigation }: any) {
   return (
     <SafeAreaView>
 
-      <AppModal onClose={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} visible={showModal} title={modalTitle} message={modalMessage} buttons={modalButtons} modalType={modalType} onYes={() => { onConfirmDelete(); if (exitOnCloseModal) onGoBack() }} onNo={() => { setShowModal(false); if (exitOnCloseModal) onGoBack() }} />
+      <AppModal visible={modalVisible} />
 
 
       <ScrollView>
@@ -287,6 +301,8 @@ export default function EditCategory({ route, navigation }: any) {
                 value={icon}
                 setValue={onSelectIcon}
                 list={iconsMap}
+
+
                 activeColor={Colors.app.tintGreen}
                 dropDownStyle={styles.dropDownBox}
                 dropDownItemStyle={{ backgroundColor: Colors.app.white }}

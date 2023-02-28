@@ -1,5 +1,5 @@
 import { SafeAreaView, StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, DeviceEventEmitter } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import TextInputBtn from "../components/TextInputBtn";
 import HorizontalDivider from "../components/HorizontalDivider";
 import CategoryCard from "../components/CategoryCard";
@@ -8,14 +8,18 @@ import ShowMore from "../components/ShowMore";
 import ProductCard from "../components/ProductCard";
 import { Category } from "../models/Category";
 import { Product } from "../models/Product";
-import { RootStackScreenProps, RootTabScreenProps } from "../types";
 import { GetAllProducts } from "../services/Products.service";
 import { GetAllCategories } from "../services/Categories.service";
 import { Colors } from "../constants/Colors";
 import ToggleSwitch from "toggle-switch-react-native";
 import { Added, FillOdd } from "../constants/Extensions";
+import MaterialCommunityIcons from "@expo/vector-icons/build/MaterialCommunityIcons";
+import { InitModal } from "../services/AppModal.service";
+import AppModal from "../components/AppModal";
 
 export default function Products({ route, navigation }: any) {
+
+  const [modalVisible, setModalVisible] = useState(false);
 
   const txtProductsRef = useRef(null);
   const [txtProductsValue, setText] = useState("");
@@ -51,10 +55,17 @@ export default function Products({ route, navigation }: any) {
 
 
   React.useEffect(() => {
-    fetchCategories();
-    fetchProducts();
-    DeviceEventEmitter.addListener('updateProducts', (e) => fetchProducts())
-    DeviceEventEmitter.addListener('updateCategories', (e) => fetchCategories())
+    onRefreshCategories();
+    onRefreshProducts(showFavoritesOnly);
+    const updateProductsListener = DeviceEventEmitter.addListener('updateProducts', (e) => fetchProducts());
+    const updateCategoriesListener = DeviceEventEmitter.addListener('updateCategories', (e) => fetchCategories());
+
+    InitModal(setModalVisible, setModalVisible);
+
+    return () =>{
+      updateProductsListener.remove();
+      updateCategoriesListener.remove();
+    }
   }, [])
 
   React.useEffect(() => {
@@ -112,10 +123,15 @@ export default function Products({ route, navigation }: any) {
   }
 
   function OnSearch() {
+    
   }
 
-  function onAddToTable(productId: number){
-    navigation.navigate("EditTableScreen", {tableId: tableId, index: index, productId: productId});
+  function onAddToTable(productId: number) {
+    if(isSelect == undefined || !isSelect){
+      navigation.navigate("Tables", { productId: productId });
+      return
+    }
+    navigation.navigate("EditTableScreen", { tableId: tableId, index: index, productId: productId, selectedFromTable: true });
   }
 
   function onFavoriteOnlyToggle(isOn: boolean) {
@@ -123,8 +139,47 @@ export default function Products({ route, navigation }: any) {
     setCurrentProducts(products.filter((p) => isOn ? p.isFavorite : true));
   }
 
+  function handleCategoryList(list: any) {
+    if (refreshingCategories) {
+      return (
+        <ActivityIndicator size="large" color={Colors.app.tint} />
+      )
+    }
+    if (currentCategories.length == 0) {
+      return (
+        <View style={styles.containerEmpytTable}>
+          <Text style={styles.textEmpytTable}>Nenhuma categoria encontrada</Text>
+          <MaterialCommunityIcons name="playlist-remove" size={40} color={Colors.app.redCancel} />
+        </View>
+
+      )
+    }
+    return list
+  }
+  function handleProductsList(list: any) {
+    if (refreshingProducts) {
+      return (
+        <ActivityIndicator size="large" color={Colors.app.tint} />
+      )
+    }
+    if (currentProducts.length == 0) {
+      return (
+        <View style={styles.containerEmpytTable}>
+          <Text style={styles.textEmpytTable}>Nenhum produto encontrado</Text>
+          <MaterialCommunityIcons name="cart-remove" size={30} color={Colors.app.redCancel} />
+        </View>
+
+      )
+    }
+    return list
+  }
+
   return (
     <View style={{ flex: 1 }}>
+
+      <AppModal visible={modalVisible} />
+
+
       <TextInputBtn
         ref={txtProductsRef}
         placeholder="Produtos"
@@ -136,7 +191,7 @@ export default function Products({ route, navigation }: any) {
 
       <ShowMore disabled={currentCategories.length <= 8}>
         <SafeAreaView>
-          {currentProducts.length > 0 ?
+          {handleCategoryList(
             <FlatList
               columnWrapperStyle={styles.categoryCol}
               contentContainerStyle={{ justifyContent: "center" }}
@@ -155,7 +210,8 @@ export default function Products({ route, navigation }: any) {
                 );
               }}
               keyExtractor={(item, index) => item.id.toString()}
-            /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
+            />)
+          }
         </SafeAreaView>
       </ShowMore>
 
@@ -178,7 +234,7 @@ export default function Products({ route, navigation }: any) {
 
 
       <SafeAreaView style={{ flex: 1 }}>
-        {currentProducts.length > 0 ?
+        {handleProductsList(
           <FlatList
             columnWrapperStyle={styles.categoryCol}
             contentContainerStyle={{ justifyContent: "center" }}
@@ -198,7 +254,8 @@ export default function Products({ route, navigation }: any) {
               );
             }}
             keyExtractor={(item, index) => item?.id?.toString()}
-          /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
+          />)
+        }
       </SafeAreaView>
     </View>
   );
@@ -223,5 +280,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: -10,
     marginBottom: 10,
+  },
+  containerEmpytTable: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textEmpytTable: {
+    fontSize: 15,
+    color: Colors.app.redCancel,
+    marginRight: 5,
   },
 });
