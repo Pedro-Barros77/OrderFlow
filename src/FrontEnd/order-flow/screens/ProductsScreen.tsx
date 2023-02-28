@@ -44,7 +44,7 @@ export default function Products({ route, navigation }: any) {
       });
   }
 
-  async function fetchProducts(filterFavorites: boolean = true) {
+  async function fetchProducts(filterFavorites: boolean = showFavoritesOnly) {
     return GetAllProducts()
       .then(list => {
         setProducts(list);
@@ -165,7 +165,7 @@ export default function Products({ route, navigation }: any) {
     if (currentProducts.length == 0) {
       return (
         <View style={styles.containerEmpytTable}>
-          <Text style={styles.textEmpytTable}>Nenhum produto encontrado</Text>
+          <Text style={styles.textEmpytTable}>Nenhum produto{showFavoritesOnly ? " favorito" : ""} encontrado</Text>
           <MaterialCommunityIcons name="cart-remove" size={30} color={Colors.app.redCancel} />
         </View>
 

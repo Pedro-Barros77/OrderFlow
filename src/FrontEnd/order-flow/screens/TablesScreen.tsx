@@ -28,7 +28,7 @@ export default function TablesScreen({ route, navigation }: RootTabScreenProps<'
       clearRouteParams();
     });
     navigation.setOptions({
-      headerTitle: getHeader 
+      headerTitle: getHeader
     });
 
     return () => {
@@ -60,7 +60,24 @@ export default function TablesScreen({ route, navigation }: RootTabScreenProps<'
     navigation.navigate('EditTableScreen', { tableId: table.id, index: i, productId: productId ?? 0 })
   }
 
-  function cancelAddProduct(){
+  function handleTableList(list: any) {
+    if (refreshingTables) {
+      return (
+        <ActivityIndicator size="large" color={Colors.app.tint} />
+      )
+    }
+    if (tables.length == 0) {
+      return (
+        <View style={styles.containerEmpytTable}>
+          <Text style={styles.textEmpytTable}>Nenhuma mesa criada.</Text>
+          <MaterialCommunityIcons name="alert-remove-outline" size={60} color={Colors.app.redCancel} />
+        </View>
+      )
+    }
+    return list
+  }
+
+  function cancelAddProduct() {
     navigation.setOptions({
       headerTitle: getHeader,
       tabBarStyle: undefined
@@ -70,7 +87,7 @@ export default function TablesScreen({ route, navigation }: RootTabScreenProps<'
   }
 
   function onAddingProduct() {
-    if (productId == undefined || productId <= 0){
+    if (productId == undefined || productId <= 0) {
       cancelAddProduct();
       return
     }
@@ -81,12 +98,12 @@ export default function TablesScreen({ route, navigation }: RootTabScreenProps<'
     });
   }
 
-  
+
 
   return (
     <View style={styles.container}>
       <View style={styles.tableList}>
-        {tables.length > 0 ?
+        {handleTableList(
           <FlatList
             columnWrapperStyle={styles.tableContainer}
             data={FillOdd(tables, 3)}
@@ -104,14 +121,14 @@ export default function TablesScreen({ route, navigation }: RootTabScreenProps<'
 
               />}
 
-          /> : <ActivityIndicator size="large" color={Colors.app.tint} />}
+          />)}
       </View>
       {productId != undefined && productId > 0 ?
-      <View style={styles.rowCancelAddItem}>
-        <TouchableOpacity activeOpacity={0.7} style={styles.btnCancelAddItem} onPress={cancelAddProduct}>
-          <Text style={styles.txtCancelAddItem}>Cancelar</Text>
-        </TouchableOpacity>
-      </View> : null}
+        <View style={styles.rowCancelAddItem}>
+          <TouchableOpacity activeOpacity={0.7} style={styles.btnCancelAddItem} onPress={cancelAddProduct}>
+            <Text style={styles.txtCancelAddItem}>Cancelar</Text>
+          </TouchableOpacity>
+        </View> : null}
 
     </View >
 
@@ -159,11 +176,11 @@ const styles = StyleSheet.create({
 
   },
 
-  rowCancelAddItem:{
-    display:"flex",
-    flexDirection:"row",
-    width:"100%",
-    justifyContent:"flex-end"
+  rowCancelAddItem: {
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "flex-end"
   },
 
   btnCancelAddItem: {
@@ -175,7 +192,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginVertical: 10,
-    marginHorizontal:20,
+    marginHorizontal: 20,
   },
 
   txtCancelAddItem: {
@@ -183,11 +200,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
   },
+  containerEmpytTable: {
+    alignItems: 'center',
+  },
+  textEmpytTable: {
+    fontSize: 20,
+    color: Colors.app.redCancel,
+  },
 
 });
 
 
-function TablesHeader(props: {onCreateTable: () => void}) {
+function TablesHeader(props: { onCreateTable: () => void }) {
   const styles = StyleSheet.create({
     container: {
       width: "100%",

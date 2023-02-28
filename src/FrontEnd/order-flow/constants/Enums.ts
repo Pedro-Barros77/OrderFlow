@@ -1,17 +1,27 @@
 export enum CategoryColor {
   gray = 1,
-  blue = 2,
+  red = 2,
   orange = 3,
   yellow = 4,
-  purple = 5,
+  green = 5,
+  cyan = 6,
+  blue = 7,
+  purple = 8,
+  pink = 9,
+  black = 10,
 }
 
 export const CategoryDisplay = {
   gray: "Cinza",
-  blue: "Azul",
+  red: "Vermelho",
   orange: "Laranja",
   yellow: "Amarelo",
+  green: "Verde",
+  cyan: "Ciano",
+  blue: "Azul",
   purple: "Roxo",
+  pink: "Rosa",
+  black: "Preto",
 };
 
 export enum CategoryIcons {

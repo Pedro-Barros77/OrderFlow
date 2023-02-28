@@ -219,7 +219,7 @@ export default function EditTableScreen({ navigation, route }: any) {
 
     const prices = _items.filter(filter ?? (x => true)).map(item => item.paid ? 0 : (item.product!.price * item.count) + item.additional - item.discount);
     return prices.length > 0 ? prices.reduce((a, b) => a + b) ?? 0 : 0;
-      
+
   }
 
 
@@ -269,6 +269,13 @@ export default function EditTableScreen({ navigation, route }: any) {
     table!.paidValue = getTotal();
 
     if (!isEdit) {
+      table!.id = tableId;
+      table?.items.forEach(item => {
+        item.table = undefined;
+        item.id = item.id < 0 ? 0 : item.id;
+      });
+      setItems([]);
+      setRefreshingItems(true);
       PostTable(table!)
         .then(res => {
           if (res.success) {
@@ -295,7 +302,6 @@ export default function EditTableScreen({ navigation, route }: any) {
       table!.id = tableId;
       table?.items.forEach(item => {
         item.table = undefined;
-        item.product = undefined;
         item.id = item.id < 0 ? 0 : item.id;
       });
       setItems([]);

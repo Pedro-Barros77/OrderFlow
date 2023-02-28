@@ -61,10 +61,7 @@ function PutTable(table: Table, tableId: number): Promise<any> {
     },
     body: JSON.stringify(table),
   })
-    .then((response) => {
-      // console.log(JSON.stringify(response));
-      return response.json();
-    })
+    .then((response) => response.json())
     .then((json) => {
       return json;
     })

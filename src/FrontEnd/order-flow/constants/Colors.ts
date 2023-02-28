@@ -35,36 +35,66 @@ const Colors = {
     //categories
     catTheme_gray: 'rgb(155, 155, 155)',
     catTheme_darkGray: 'rgb(103, 103, 103)',
-    catTheme_blue: 'rgb(97,130,194)',
-    catTheme_darkBlue: 'rgb(61,94,157)',
+    catTheme_red: 'rgb(201, 99, 99)',
+    catTheme_darkRed: 'rgb(120, 32, 32)',
     catTheme_orange: 'rgb(182, 135, 108)',
     catTheme_darkOrange: 'rgb(141, 93, 64)',
     catTheme_yellow: 'rgb(184, 172, 98)',
     catTheme_darkYellow: 'rgb(139, 127, 56)',
-    catTheme_purple: 'rgb(175, 133, 159)',
-    catTheme_darkPurple: 'rgb(137, 83, 116)',
+    catTheme_green: 'rgb(91, 199, 116)',
+    catTheme_darkGreen: 'rgb(45, 140, 67)',
+    catTheme_cyan: 'rgb(118, 192, 194)',
+    catTheme_darkCyan: 'rgb(39, 127, 130)',
+    catTheme_blue: 'rgb(97,130,194)',
+    catTheme_darkBlue: 'rgb(61,94,157)',
+    catTheme_purple: 'rgb(181, 132, 196)',
+    catTheme_darkPurple: 'rgb(106, 54, 125)',
+    catTheme_pink: 'rgb(199, 131, 166)',
+    catTheme_darkPink: 'rgb(133, 53, 104)',
+    catTheme_black: 'rgb(90, 90, 90)',
+    catTheme_darkBlack: 'rgb(0, 0, 0)',
 
   }
 };
 
 function GetCategoryColor(catColor?: CategoryColor, isSecondary?: boolean): string {
   switch (catColor) {
+    case CategoryColor.red:
+      return isSecondary
+        ? Colors.app.catTheme_darkRed
+        : Colors.app.catTheme_red;
+      case CategoryColor.orange:
+    return isSecondary
+      ? Colors.app.catTheme_darkOrange
+      : Colors.app.catTheme_orange;
+      case CategoryColor.yellow:
+    return isSecondary
+      ? Colors.app.catTheme_darkYellow
+      : Colors.app.catTheme_yellow;
+      case CategoryColor.green:
+    return isSecondary
+      ? Colors.app.catTheme_darkGreen
+      : Colors.app.catTheme_green;
+    case CategoryColor.cyan:
+      return isSecondary
+        ? Colors.app.catTheme_darkCyan
+        : Colors.app.catTheme_cyan;
     case CategoryColor.blue:
       return isSecondary
         ? Colors.app.catTheme_darkBlue
         : Colors.app.catTheme_blue;
-    case CategoryColor.orange:
-      return isSecondary
-        ? Colors.app.catTheme_darkOrange
-        : Colors.app.catTheme_orange;
-    case CategoryColor.yellow:
-      return isSecondary
-        ? Colors.app.catTheme_darkYellow
-        : Colors.app.catTheme_yellow;
     case CategoryColor.purple:
       return isSecondary
         ? Colors.app.catTheme_darkPurple
         : Colors.app.catTheme_purple;
+      case CategoryColor.pink:
+    return isSecondary
+      ? Colors.app.catTheme_darkPink
+      : Colors.app.catTheme_pink;
+    case CategoryColor.black:
+      return isSecondary
+        ? Colors.app.catTheme_darkBlack
+        : Colors.app.catTheme_black;
     default:
       return isSecondary
         ? Colors.app.catTheme_darkGray
