@@ -131,7 +131,7 @@ export default function Products({ route, navigation }: any) {
       navigation.navigate("Tables", { productId: productId });
       return
     }
-    navigation.navigate("EditTableScreen", { tableId: tableId, index: index, productId: productId });
+    navigation.navigate("EditTableScreen", { tableId: tableId, index: index, productId: productId, selectedFromTable: true });
   }
 
   function onFavoriteOnlyToggle(isOn: boolean) {

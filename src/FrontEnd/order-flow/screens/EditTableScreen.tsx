@@ -19,7 +19,7 @@ import { HideModal, InitModal, OpenModal } from '../services/AppModal.service';
 import { ModalButton } from '../models/ModalButton';
 
 export default function EditTableScreen({ navigation, route }: any) {
-  const { tableId, index, productId } = route.params;
+  const { tableId, index, productId, selectedFromTable } = route.params;
   const isEdit = tableId && tableId > 0
 
   const [name, setName] = useState('');
@@ -34,10 +34,13 @@ export default function EditTableScreen({ navigation, route }: any) {
 
   const [goBackSubscription, setGoBackSubscription] = useState<{ unsubscribe: () => void }>({ unsubscribe: () => { } })
 
+  const clearRouteParams = (prodId?: number) => navigation.setParams({ tableId: tableId, index: index, productId: prodId });
+
   React.useEffect(() => {
     if (isEdit) {
-      onRefreshItems()
+      onRefreshItems(true);
     }
+
     InitModal(setModalVisible, setModalVisible);
   }, [])
 
@@ -65,7 +68,8 @@ export default function EditTableScreen({ navigation, route }: any) {
   }, [hasChanges])
 
   React.useEffect(() => {
-    onProductSelected();
+    if (selectedFromTable === true)
+      onProductSelected(items);
   }, [productId]);
 
   React.useEffect(() => {
@@ -122,14 +126,33 @@ export default function EditTableScreen({ navigation, route }: any) {
   function fetchTable() {
     return GetTableById(tableId)
       .then(table => {
-        if (table!.items.length > 0)
-          setItems(table!.items);
+        if (table!.items.length > 0) {
+          if (productId != undefined && productId > 0)
+            onProductSelected(table!.items);
+          else
+            setItems(table!.items);
+        }
         setTable(table);
         setName(table!.name)
       });
   }
 
-  const onRefreshItems = React.useCallback(() => {
+  const onRefreshItems = React.useCallback((confirm?: boolean, changes?: boolean) => {
+    if ((confirm === false || confirm == undefined) && changes === true) {
+      OpenModal({
+        title: "Atenção!",
+        message: "Existem modifições nos produtos que não foram salvas. Deseja descartar?",
+        buttons: [
+          new ModalButton("Descartar", () => {
+            HideModal();
+            onRefreshItems(true);
+          }),
+          new ModalButton("Cancelar", () => HideModal(), undefined, Colors.app.redCancel),
+        ],
+      });
+      return;
+    }
+
     setRefreshingItems(true);
 
     fetchTable().finally(() => {
@@ -168,15 +191,33 @@ export default function EditTableScreen({ navigation, route }: any) {
     getItem(id).note = value;
     setHasChanges(true);
   }
-  function removeItem(id: number) {
+  function removeItem(id: number, confirm?: boolean) {
+    if (confirm === false || confirm == undefined) {
+      OpenModal({
+        title: "Atenção!",
+        message: `Tem certeza que deseja remover o produto "${items.find(x => x.id == id)?.product?.title}"?`,
+        buttons: [
+          new ModalButton("Sim", () => {
+            HideModal();
+            removeItem(id, true)
+          }),
+          new ModalButton("Não", () => HideModal(), undefined, Colors.app.redCancel),
+        ],
+        styleType: "warning",
+      });
+      return;
+    }
+
     setItems(items.filter(x => x.id !== id));
-    setTotal(getTotal());
+    setTotal(getTotal((x: Item) => x.id != id));
     setHasChanges(true);
   }
 
-  function getTotal(): number {
-    if (items.length == 0) return 0;
-    return items.map(item => item.paid ? 0 : (item.product!.price * item.count) + item.additional - item.discount)
+  function getTotal(filter?: any, source?: Array<Item>): number {
+    const _items = source ?? items;
+    if (_items.length == 0) return 0;
+
+    return _items.filter(filter ?? (x => true)).map(item => item.paid ? 0 : (item.product!.price * item.count) + item.additional - item.discount)
       .reduce((a, b) => a + b) ?? 0;
   }
 
@@ -189,18 +230,23 @@ export default function EditTableScreen({ navigation, route }: any) {
     navigation.navigate("SelectProduct", { tableId: tableId, index: index, isSelect: true });
   }
 
-  function onProductSelected() {
+  function onProductSelected(previousItems: Array<Item>) {
     InitModal(setModalVisible, setModalVisible);
     if (productId == undefined || productId <= 0) return;
 
     GetProductById(productId).then(p => {
-      setItems(Added(items, new Item(items.length > 0 ? -Math.abs(items[items.length - 1].id + 1) : -1, p!.id, table!.id, p!, table!, 1, 0, 0, ItemStatus.Pendente, false, '')));
+      const minId = Math.min(...previousItems.map(x => x.id));
+      const id = minId < 0 ? minId - 1 : -1;
+      const newItems = Added(previousItems, new Item(id, p!.id, table!.id, p!, table!, 1, 0, 0, ItemStatus.Pendente, false, ''), true);
+      setItems(newItems);
       setHasChanges(true);
+      clearRouteParams();
+      setTotal(getTotal(undefined, newItems));
     });
   }
 
   function onCloseOrder() {
-    
+
     items.forEach(item => {
       let _sum = (item.product!.price * item.count) + Number(item.additional) - Number(item.discount)
       if (_sum < 0) {
@@ -214,8 +260,6 @@ export default function EditTableScreen({ navigation, route }: any) {
       }
       item.paid = true
     });
-    setItems(items)
-    
   }
 
   function onSave() {
@@ -368,7 +412,7 @@ export default function EditTableScreen({ navigation, route }: any) {
 
       <AppModal visible={modalVisible} />
 
-      <View>
+      <View style={{ flex: 1 }}>
         <InputOutline
           style={styles.input}
           activeColor={Colors.app.tint}
@@ -392,7 +436,7 @@ export default function EditTableScreen({ navigation, route }: any) {
             data={items}
             numColumns={1}
             refreshControl={
-              <RefreshControl refreshing={refreshingItems} onRefresh={onRefreshItems} />
+              <RefreshControl refreshing={refreshingItems} onRefresh={() => onRefreshItems(undefined, hasChanges)} />
             }
             renderItem={({ item }) => {
               return (

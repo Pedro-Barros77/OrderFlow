@@ -15,10 +15,15 @@ function FillOdd(data: any, columns: number) {
   return data;
 }
 
-function Added(collection: Array<any>, newItem: any) {
+function Added(collection: Array<any>, newItem: any, prepend?: boolean) {
   if (newItem == null || newItem == undefined) return collection;
   const coll = [...collection];
-  coll.push(newItem);
+  if(prepend === true){
+    coll.unshift(newItem);
+  }
+  else{
+    coll.push(newItem);
+  }
   return coll;
 }
 
