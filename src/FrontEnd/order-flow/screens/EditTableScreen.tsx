@@ -217,8 +217,9 @@ export default function EditTableScreen({ navigation, route }: any) {
     const _items = source ?? items;
     if (_items.length == 0) return 0;
 
-    return _items.filter(filter ?? (x => true)).map(item => item.paid ? 0 : (item.product!.price * item.count) + item.additional - item.discount)
-      .reduce((a, b) => a + b) ?? 0;
+    const prices = _items.filter(filter ?? (x => true)).map(item => item.paid ? 0 : (item.product!.price * item.count) + item.additional - item.discount);
+    return prices.length > 0 ? prices.reduce((a, b) => a + b) ?? 0 : 0;
+      
   }
 
 
