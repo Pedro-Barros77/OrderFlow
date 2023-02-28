@@ -32,11 +32,11 @@ namespace OrderFlow.Business.Services
         private bool IsValid(Product value)
         {
             Regex regex = new Regex(@"^[\w\s\-à-úÀ-Ú]+$");
-            if (value.Title.Length > 50) { AddError("ERRO(Titulo deve ser menor que 50 caracteres) "); }
-            if (!regex.IsMatch(value.Title)) { AddError("ERRO(Não é possível adicionar caracteres especiais ao Titulo) "); }
-            if (value.Description.Length > 255) { AddError("ERRO(Descrição deve ser menor que 255 caracteres) "); }
-            if (value.ImageURL.Length > 255) { AddError("ERRO(Imagem deve ser menor que 255 caracteres) "); }
-            if (value.Price < 0 ) { AddError("ERRO(Preço não pode ser valor negativo) "); }
+            if (value.Title.Length > 50) { AddError("O titulo deve possuir menos de 50 caracteres!"); }
+            if (!regex.IsMatch(value.Title)) { AddError("Não é permitido adicionar caracteres especiais ao Titulo!"); }
+            if (value.Description.Length > 255) { AddError("A descrição deve possuir menos de 255 caracteres!"); }
+            if (value.ImageURL.Length > 255) { AddError("A URL da imagem deve possuir menos de 255 caracteres!"); }
+            if (value.Price < 0 ) { AddError("O preço não pode ser negativo!"); }
             return !HasError();
         }
 

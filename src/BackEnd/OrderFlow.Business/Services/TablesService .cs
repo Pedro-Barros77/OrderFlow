@@ -35,12 +35,12 @@ namespace OrderFlow.Business.Services
 
         private bool IsValid(Table table)
         {
-            Regex regex = new Regex(@"^[\w\s\-à-úÀ-Ú]*$");
-            if (table.Name.Length > 50) { AddError("ERRO(Nome deve ser menor que 50 caracteres) "); }
-            if (!regex.IsMatch(table.Name)) { AddError("ERRO(Não é possível adicionar caracteres especiais ao Titulo) "); }
-            if (table.PaidValue < 0) { AddError("ERRO(Preço não pode ser valor negativo) "); }
-            if (table.Items.Any(item => (item.Product.Price * item.Count) + item.Additional - item.Discount < 0))
-                AddError("ERRO(Não é permitido salvar um item com valor total menor que zero!) ");
+            Regex regex = new(@"^[\w\s\-à-úÀ-Ú]*$");
+            if (table.Name.Length > 50) { AddError("O nome deve possuir menos de 50 caracteres!"); }
+            if (!regex.IsMatch(table.Name)) { AddError("Não é permitido adicionar caracteres especiais ao Titulo!"); }
+            if (table.PaidValue < 0) { AddError("O preço pago não pode ser valor negativo!"); }
+            if (table.Items != null && table.Items.Any(item => (item.Product.Price * item.Count) + item.Additional - item.Discount < 0))
+                AddError("Não é permitido salvar um item com valor total menor que zero!");
             return !HasError();
         }
 

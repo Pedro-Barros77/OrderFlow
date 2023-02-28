@@ -32,10 +32,10 @@ namespace OrderFlow.Business.Services
         private bool IsValid(Category value)
         {
             Regex regex = new Regex(@"^[\w\s\-à-úÀ-Ú]+$");
-            if (value.Title.Length > 50) { AddError("ERRO(Titulo deve ser menor que 50 caracteres) "); }
-            if (!regex.IsMatch(value.Title)) { AddError("ERRO(Não é possível adicionar caracteres especiais ao Titulo) "); }
-            if (value.ColorTheme < 0) { AddError("ERRO(O valor deve ser maior que zero "); }
-            if (value.CategoryIcon < 0) { AddError("ERRO(O valor deve ser maior que zero "); }
+            if (value.Title.Length > 50) { AddError("O titulo deve possuir menos de 50 caracteres!"); }
+            if (!regex.IsMatch(value.Title)) { AddError("Não é permitido adicionar caracteres especiais ao Titulo!"); }
+            if (value.ColorTheme < 0) { AddError("A cor informada para a categoria é inválida!"); }
+            if (value.CategoryIcon < 0) { AddError("O icone informado para a categoria é inválido!"); }
             return !HasError();
         }
 

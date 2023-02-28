@@ -32,10 +32,10 @@ namespace OrderFlow.Business.Services
         private bool IsValid(Item value)
         {
             Regex regex = new Regex(@"^[\w\s\-à-úÀ-Ú]+$");
-            if (value.Note.Length > 255) { AddError("ERRO(Observação deve ser menor que 50 caracteres) "); }
-            if (value.Additional < 0) { AddError("ERRO(Adicional não pode ser valor negativo) "); }
-            if (value.Discount < 0) { AddError("ERRO(Desconto não pode ser valor negativo) "); }
-            if (value.Count < 0) { AddError("ERRO(Quantidade não pode ser valor negativo) "); }
+            if (value.Note.Length > 255) { AddError("A observação deve possuir menos de 50 caracteres!"); }
+            if (value.Additional < 0) { AddError("O valor adicional não pode ser negativo!"); }
+            if (value.Discount < 0) { AddError("O valor de desconto não pode ser negativo!"); }
+            if (value.Count < 0) { AddError("A quantidade não pode ser negativa!"); }
             return !HasError();
         }
 

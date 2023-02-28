@@ -11,7 +11,7 @@ namespace OrderFlow.Data.Mappings
             builder.HasKey(d => d.Id);
 
             builder.Property(d => d.Name)
-                .IsRequired()
+                .IsRequired(false)
                 .HasMaxLength(50);
 
             builder.Property(d => d.PaidValue)              
